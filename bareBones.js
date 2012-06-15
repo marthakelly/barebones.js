@@ -1,13 +1,18 @@
 #!/usr/bin/env node
-var fs = require('fs'),
-	source = process.argv.splice(2)[0],
-	target = source.substring(0, source.lastIndexOf('.')) + '.css';
 
-fs.readFile(source, 'utf-8', function(err, data) {
-	var dataFormatter = function (data) {
-		return data.map(function(line) {
+var fs = require('fs'),
+	bare = process.argv.splice(2)[0],
+	css = bare.substring(0, bare.lastIndexOf('.')) + '.css';
+
+fs.readFile(bare, 'utf-8', function(err, data) {
+	if (err) throw err;
+	
+	var dataFormatter = function (data) {		
+		return data.map(function(line) {	
+			var equalize = line.trimLeft();
+
 			return {
-				line: line
+				line: equalize
 			};
 		});
 	};
@@ -16,7 +21,7 @@ fs.readFile(source, 'utf-8', function(err, data) {
 		return data.map(function(elem) {
 			if (elem.line.charAt(0) === "@") {
 				// will deal with variables later, just logging it for now
-				console.log(elem.line);
+				//console.log(elem.line);
 			} else if (elem.line.search(":") != "-1") {
 				return elem.line + ";";
 			} else if (elem.line === "") {
@@ -33,7 +38,7 @@ fs.readFile(source, 'utf-8', function(err, data) {
 
 	var tree = dataFormatter(parts);
 	
-	console.log(dataFormatter(parts));
+	//console.log(dataFormatter(parts));
 
 	var join = cssFormatter(tree).join('\n');
 		
@@ -41,12 +46,15 @@ fs.readFile(source, 'utf-8', function(err, data) {
 
 	var output = final;
 
-	fs.writeFile(target, output, function(err) {
+	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
-		console.log('Converted ' + source + ' to ' + target);
+		
+		console.log('Converted ' + bare + ' to ' + css);
     });
 });
 
 // could input data as a HUGE object
 // and search for object properties with the : char in it, which indicates a property/value
 // could extract variable declarations, remove all white space, and reformat!
+
+// or if there is space to the left it's a child element of the item before it
