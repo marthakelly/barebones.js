@@ -28,7 +28,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			} else if (property === true) {
 				properties.push(line);
 			} else if (indent === true && property === false) {
-				children.push(line);
+				children.push(line.trimLeft());
 			}
 			
 			return {
@@ -54,13 +54,19 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				//tree.push({declarations: []})	;			
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();
-				tree[tree.length-1].declarations.push(value);
+				if (tree[tree.length-1].children) {
+					console.log("i am the value of a nested thing");
+				} else {
+					tree[tree.length-1].declarations.push(value);
+				}
 			} else if (elem.children.length >= 1) {
 				tree[tree.length-1].children = elem.children;
 			}
 		});
 		
 		console.log(tree);
+		
+		return tree;
 		// console.log(variables);
 		
 	};
