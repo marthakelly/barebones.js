@@ -13,13 +13,17 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				declaration,
 				indent,
 				property,
+				variable,
 				properties = [],
 				children = [];
 
 			/^\s/.test(line) ? indent = true : indent = false;
+			
 			line.search(':') != "-1" ? property = true : property = false;
 			
-			if (indent === false ) {
+			if (line.charAt(0) === '@') {
+				variable = line;
+			} else if (indent === false && !(line.charAt(0) === "@")) {
 				selector = line;
 			} else if (property === true) {
 				properties.push(line);
@@ -28,6 +32,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			}
 			
 			return {
+				variable: variable,
 				selector: selector,
 				declaration: properties,
 				children: children
@@ -36,15 +41,27 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 
 	var cssFormatter = function (data) {
-		var tree = [];
+		var tree = [],
+			variables = [];	
+				
+		// console.log(data);
 				
 		data.map(function(elem) {
-			if (elem.selector) {
-				tree.push({selector: elem.selector});				
+			if (elem.variable) {
+				variables.push({variable: elem.variable});
+			} else if (elem.selector) {
+				tree.push({selector: elem.selector});
+				tree.push({declarations: []})				
+			} else if (elem.declaration.length >= 1) {
+				tree[tree.length-1].declarations.push({ declaration: elem.declaration });
+				console.log("I am a declaration");
+			} else if (elem.children.length >= 1) {
+				tree[tree.length-1].children = elem.children;
 			}
 		});
 		
 		console.log(tree);
+		console.log(variables);
 		
 	};
 
