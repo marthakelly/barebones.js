@@ -16,7 +16,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				variable,
 				properties = [],
 				children = [];
-
+				
+			// qualifiers
 			/^\s/.test(line) ? indent = true : indent = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
@@ -44,27 +45,29 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		var tree = [],
 			variables = [];	
 				
-		// console.log(data);
+		//console.log(data);
 				
 		data.map(function(elem) {
 			if (elem.variable) {
 				variables.push({variable: elem.variable});
 			} else if (elem.selector) {
 				tree.push({selector: elem.selector, declarations: []});
-				//tree.push({declarations: []})	;			
+			} else if (elem.children != "") {
+				childSelector = elem.children.toString();
+				tree[tree.length-1].children = {selector: childSelector, declarations: []};
 			} else if (elem.declaration.length >= 1) {
-				var value = elem.declaration.toString();
+				var value = elem.declaration.toString();				
 				if (tree[tree.length-1].children) {
-					console.log("i am the value of a nested thing");
+					tree[tree.length-1].children.declarations.push(value);
+					console.log(value + " child");
 				} else {
 					tree[tree.length-1].declarations.push(value);
+					console.log(value + " not child")
 				}
-			} else if (elem.children.length >= 1) {
-				tree[tree.length-1].children = elem.children;
 			}
 		});
 		
-		console.log(tree);
+		// console.log(tree);
 		
 		return tree;
 		// console.log(variables);
@@ -72,14 +75,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 
 	console.log(cssFormatter(dataFormatter(data.split('\n'))));
-
-	/*var parts = data.split('\n');
-
-	var tree = dataFormatter(parts);
-	
-	var join = cssFormatter(tree).join('\n');
-		
-	var final = join.charAt(join.length-1) === "}" ? join : join + "\n}";*/
 
 	final = data;
 
