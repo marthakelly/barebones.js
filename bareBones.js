@@ -50,18 +50,18 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (elem.variable) {
 				variables.push({variable: elem.variable});
 			} else if (elem.selector) {
-				tree.push({selector: elem.selector});
-				tree.push({declarations: []})				
+				tree.push({selector: elem.selector, declarations: []});
+				//tree.push({declarations: []})	;			
 			} else if (elem.declaration.length >= 1) {
-				tree[tree.length-1].declarations.push({ declaration: elem.declaration });
-				console.log("I am a declaration");
+				var value = elem.declaration.toString();
+				tree[tree.length-1].declarations.push(value);
 			} else if (elem.children.length >= 1) {
 				tree[tree.length-1].children = elem.children;
 			}
 		});
 		
 		console.log(tree);
-		console.log(variables);
+		// console.log(variables);
 		
 	};
 
