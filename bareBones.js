@@ -58,11 +58,10 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();				
 				if (tree[tree.length-1].children) {
+					// this is not working, whyyyyyy
 					tree[tree.length-1].children.declarations.push(value);
-					console.log(value + " child");
 				} else {
 					tree[tree.length-1].declarations.push(value);
-					console.log(value + " not child")
 				}
 			}
 		});
