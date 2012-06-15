@@ -7,42 +7,58 @@ var fs = require('fs'),
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
-	var dataFormatter = function (data) {		
+	var dataFormatter = function (data) {	
 		return data.map(function(line) {	
-			var equalize = line.trimLeft();
+			var selector,
+				declaration,
+				indent,
+				property,
+				properties = [],
+				children = [];
 
+			/^\s/.test(line) ? indent = true : indent = false;
+			line.search(':') != "-1" ? property = true : property = false;
+			
+			if (indent === false ) {
+				selector = line;
+			} else if (property === true) {
+				properties.push(line);
+			} else if (indent === true && property === false) {
+				children.push(line);
+			}
+			
 			return {
-				line: equalize
+				selector: selector,
+				declaration: properties,
+				children: children
 			};
 		});
 	};
 
 	var cssFormatter = function (data) {
-		return data.map(function(elem) {
-			if (elem.line.charAt(0) === "@") {
-				// will deal with variables later, just logging it for now
-				//console.log(elem.line);
-			} else if (elem.line.search(":") != "-1") {
-				return elem.line + ";";
-			} else if (elem.line === "") {
-				return elem.line + "}";
-			} else if (elem.line.charAt(0) !== " ") {
-				return elem.line + " {";
-			} else {
-				return elem.line;
+		var tree = [];
+				
+		data.map(function(elem) {
+			if (elem.selector) {
+				tree.push({selector: elem.selector});				
 			}
-		});	
+		});
+		
+		console.log(tree);
+		
 	};
 
-	var parts = data.split('\n');
+	console.log(cssFormatter(dataFormatter(data.split('\n'))));
+
+	/*var parts = data.split('\n');
 
 	var tree = dataFormatter(parts);
 	
-	//console.log(dataFormatter(parts));
-
 	var join = cssFormatter(tree).join('\n');
 		
-	var final = join.charAt(join.length-1) === "}" ? join : join + "\n}";
+	var final = join.charAt(join.length-1) === "}" ? join : join + "\n}";*/
+
+	final = data;
 
 	var output = final;
 
