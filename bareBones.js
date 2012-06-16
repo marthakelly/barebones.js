@@ -68,14 +68,17 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	var transform = function (tree) {
-		console.log(tree);
+		tree.map(function(elem){
+			console.log(elem.selector);
+		});
 	};
+	
+	// stringify console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
+	var dataFormatter = dataFormatter(data.split('\n'));
 
-	console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
+	console.log(transform(cssFormatter(dataFormatter)));
 
-	var final = transform(cssFormatter(dataFormatter(data.split('\n'))));
-
-	var output = final;
+	var output = "css WILL GO HERE";
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
