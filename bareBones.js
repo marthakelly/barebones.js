@@ -16,7 +16,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				variable,
 				properties = [],
 				children = [];
-				
+								
 			// qualifiers
 			/^\s/.test(line) ? indent = true : indent = false;
 			
@@ -53,12 +53,11 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			} else if (elem.selector) {
 				tree.push({selector: elem.selector, declarations: []});
 			} else if (elem.children != "") {
-				childSelector = elem.children.toString();
+				var childSelector = elem.children.toString();
 				tree[parent].children = {selector: childSelector, declarations: []};
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();
 				if (tree[parent].children) {
-					// this is not working, whyyyyyy
 					tree[parent].children.declarations.push(value);
 				} else {
 					tree[parent].declarations.push(value);
@@ -67,10 +66,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		});
 		return tree;
 	};
+	
+	var transform = function (tree) {
+		console.log(tree);
+	};
 
-	console.log(cssFormatter(dataFormatter(data.split('\n'))));
+	console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
 
-	final = cssFormatter(dataFormatter(data.split('\n')));
+	var final = transform(cssFormatter(dataFormatter(data.split('\n'))));
 
 	var output = final;
 
