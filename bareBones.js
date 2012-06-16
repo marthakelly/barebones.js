@@ -67,18 +67,21 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var transform = function (tree) {
-		tree.map(function(elem){
-			console.log(elem.selector);
+	var display = function (tree) {
+
+		return tree.map(function(elem){
+			return elem.selector + " {" + "\n" + elem.declarations.join("; \n") + ';' + '\n' + '}';
+			//console.log(elem.selector + " {" + "\n" + elem.declarations.join("; \n") + ';' + '\n' + '}');
 		});
+		
 	};
 	
 	// stringify console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
 	var dataFormatter = dataFormatter(data.split('\n'));
 
-	console.log(transform(cssFormatter(dataFormatter)));
-
-	var output = "css WILL GO HERE";
+	console.log(display(cssFormatter(dataFormatter)));
+	
+	var output = (display(cssFormatter(dataFormatter))).join('\n');
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
