@@ -41,7 +41,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				children: children,
 				isChild: isChild
 			};
+			
 		});
+		
 	};
 
 	var cssFormatter = function (data) {
@@ -53,11 +55,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			};
 				
 		data.map(function(elem) {
-			var parent = tree.length-1,
-				i = 0;
+			var parent = tree.length-1;
 			
-			// console.log(elem);
-							
 			// separate out variables
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
@@ -70,15 +69,27 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			// I need to remove that empty string children before the data gets to the CSS formatter...
 			// until then this is my janky fallback
 			
-			if (elem.isChild && elem.children != "") {	
+			if (elem.isChild && elem.children != "") {
 				
-				if ( isEmpty(tree[parent].children) ) {
+				// console.log(elem);
+				
+				/*if ( isEmpty(tree[parent].children) ) {
 					tree[parent].children = { selector: elem.children.toString(), declarations: [], children: {} };
-				} else {
-					console.log(elem);
-				}
-
+				} */
+				
+				var recursion = function (parent) {
+					// console.log(parent);
+					
+					if ( isEmpty(parent) ) {
+						parent.children = { selector: elem.children.toString(), declarations: [], children: {} };
+					} else {
+						recursion(parent.children);
+					}
+				};
+							
+				recursion(tree[parent].children, 0); 
 			}
+			
 			
 			
 			
