@@ -53,16 +53,16 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			isEmpty = function(obj) {
 			  return Object.keys(obj).length === 0;
 			};
-				
+							
 		data.map(function(elem) {
 			var parent = tree.length-1;
-			
+									
 			// separate out variables
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
 			}
 			
-			if (elem.selector) {
+			if (elem.selector) {				
 				tree.push({ selector: elem.selector, declarations: [], children: {} });
 			}
 			
@@ -72,7 +72,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (elem.isChild && elem.children != "") {
 
 				var recursion = function (parent) {
-					
 					if ( isEmpty(parent.children) ) {
 						parent.children = { selector: elem.children.toString(), declarations: [], children: {} };
 					} else {
@@ -80,7 +79,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					}
 				};
 							
-				recursion(tree[parent], 0); 
+				recursion(tree[parent]); 
 			}
 			
 		});
@@ -98,7 +97,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
 	
 	// console.log(dataFormatter(data.split('\n')));
-	
+		
 	var dataFormatter = dataFormatter(data.split('\n'));
 	
 	var output = (display(cssFormatter(dataFormatter))).join('\n');
