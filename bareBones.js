@@ -55,7 +55,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				tree.push({selector: elem.selector, declarations: []});
 			} else if (elem.children != "") {
 				var childSelector = elem.children.toString();
-				tree[parent].children = {selector: childSelector, declarations: []};
+				tree[parent].children = {selector: childSelector, declarations: [], children: {}};
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();
 				// replace variables
@@ -64,6 +64,17 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 						two = variables[i][1].replace(';', '').trim();
 					value = value.replace(one, two);
 				}
+				
+				// figuring out nesting
+				
+				for (var j = 0; j < tree.length; j++) {
+					for (var prop in tree[i]) {
+						if (prop === "children") {
+							console.log("found one!");
+						}
+					}
+				}
+				
 				if (tree[parent].children) {
 					tree[parent].children.declarations.push(value);
 				} else {
@@ -82,9 +93,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	// stringify
-	// console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
+	console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
 	
-	console.log(dataFormatter(data.split('\n')));
+	// console.log(dataFormatter(data.split('\n')));
 	
 	var dataFormatter = dataFormatter(data.split('\n'));
 	
