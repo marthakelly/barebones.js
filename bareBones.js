@@ -27,7 +27,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			} else if (indent === false && !(line.charAt(0) === "@")) {
 				selector = line;
 			} else if (property === true) {
-				properties.push(line);
+				properties.push(line);	
 			} else if (indent === true && property === false) {
 				children.push(line.trimLeft());
 			}
@@ -46,7 +46,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			variables = [];	
 				
 		data.map(function(elem) {
-			var parent = tree.length-1;
+			var parent = tree.length-1,
+				i = 0;
+				
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
 			} else if (elem.selector) {
@@ -56,30 +58,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				tree[parent].children = {selector: childSelector, declarations: []};
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();
-				
-				
-				for (var i = 0, i; i < variables.length; i++) {
+				// replace variables
+				for (; i < variables.length; i++) {
 					var one = variables[i][0].trim(),
 						two = variables[i][1].replace(';', '').trim();
-					
 					value = value.replace(one, two);
-					// console.log(variables[i][0]);
-					// console.log(variables[i][1]);
-					// console.log(variables);
 				}
-				
-				console.log(value);
-				
-				/*variables.forEach(function(elem){
-					var one = elem[0],
-						two = elem[1];
-						// console.log(one);
-						// console.log(two);
-						//var newValue = value.replace(one, two);
-						//console.log(newValue);
-						console.log(elem);
-				});*/
-				
 				if (tree[parent].children) {
 					tree[parent].children.declarations.push(value);
 				} else {
@@ -87,16 +71,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				}
 			}
 		});
-				
-		/*variables.map(function(elem){			
-			var variable = elem[0],
-				value = elem[1];
-				
-				// console.log(variable);
-				// console.log(value);
-		});*/
-		
-		// console.log(variables);
 
 		return tree;
 	};
@@ -110,9 +84,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// stringify
 	// console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
 	
+	console.log(dataFormatter(data.split('\n')));
+	
 	var dataFormatter = dataFormatter(data.split('\n'));
-
-	// console.log(display(cssFormatter(dataFormatter)));
 	
 	var output = (display(cssFormatter(dataFormatter))).join('\n');
 
