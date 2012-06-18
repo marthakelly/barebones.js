@@ -15,13 +15,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				property,
 				variable,
 				properties = [],
-				children = [];
+				children = [],
+				isChild = false;
 								
 			// qualifiers
 			/^\s/.test(line) ? indent = true : indent = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
-			
+						
 			if (line.charAt(0) === '@') {
 				variable = line;
 			} else if (indent === false && !(line.charAt(0) === "@")) {
@@ -30,25 +31,61 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				properties.push(line);	
 			} else if (indent === true && property === false) {
 				children.push(line.trimLeft());
+				isChild = true;
 			}
 			
 			return {
 				variable: variable,
 				selector: selector,
 				declaration: properties,
-				children: children
+				children: children,
+				isChild: isChild
 			};
 		});
 	};
 
 	var cssFormatter = function (data) {
 		var tree = [],
-			variables = [];	
+			variables = [],
+			// helper
+			isEmpty = function(obj) {
+			  return Object.keys(obj).length === 0;
+			};
 				
 		data.map(function(elem) {
 			var parent = tree.length-1,
 				i = 0;
+			
+			// console.log(elem);
+							
+			// separate out variables
+			if (elem.variable) {
+				variables.push(elem.variable.split('='));
+			}
+			
+			if (elem.selector) {
+				tree.push({ selector: elem.selector, declarations: [], children: {} });
+			}
+			
+			// I need to remove that empty string children before the data gets to the CSS formatter...
+			// until then this is my janky fallback
+			
+			if (elem.isChild && elem.children != "") {	
 				
+				if ( isEmpty(tree[parent].children) ) {
+					tree[parent].children = { selector: elem.children.toString(), declarations: [], children: {} };
+				} else {
+					console.log(elem);
+				}
+
+			}
+			
+			
+			
+			
+			
+			
+			/*			
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
 			} else if (elem.selector) {
@@ -58,6 +95,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				tree[parent].children = {selector: childSelector, declarations: [], children: {}};
 			} else if (elem.declaration.length >= 1) {
 				var value = elem.declaration.toString();
+				
 				// replace variables
 				for (; i < variables.length; i++) {
 					var one = variables[i][0].trim(),
@@ -65,22 +103,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					value = value.replace(one, two);
 				}
 				
-				// figuring out nesting
-				
-				for (var j = 0; j < tree.length; j++) {
-					for (var prop in tree[i]) {
-						if (prop === "children") {
-							console.log("found one!");
-						}
-					}
-				}
-				
 				if (tree[parent].children) {
 					tree[parent].children.declarations.push(value);
 				} else {
 					tree[parent].declarations.push(value);
 				}
-			}
+			} else if (elem.isChild) {
+				console.log("child!");
+			}*/
+			
 		});
 
 		return tree;
