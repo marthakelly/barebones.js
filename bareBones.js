@@ -60,7 +60,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				
 				for (var i = 0, i; i < variables.length; i++) {
 					var one = variables[i][0].trim(),
-						two = variables[i][1].trim();
+						two = variables[i][1].replace(';', '').trim();
 					
 					value = value.replace(one, two);
 					// console.log(variables[i][0]);
