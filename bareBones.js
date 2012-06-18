@@ -70,58 +70,18 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			// until then this is my janky fallback
 			
 			if (elem.isChild && elem.children != "") {
-				
-				// console.log(elem);
-				
-				/*if ( isEmpty(tree[parent].children) ) {
-					tree[parent].children = { selector: elem.children.toString(), declarations: [], children: {} };
-				} */
-				
+
 				var recursion = function (parent) {
-					// console.log(parent);
 					
-					if ( isEmpty(parent) ) {
+					if ( isEmpty(parent.children) ) {
 						parent.children = { selector: elem.children.toString(), declarations: [], children: {} };
 					} else {
 						recursion(parent.children);
 					}
 				};
 							
-				recursion(tree[parent].children, 0); 
+				recursion(tree[parent], 0); 
 			}
-			
-			
-			
-			
-			
-			
-			
-			/*			
-			if (elem.variable) {
-				variables.push(elem.variable.split('='));
-			} else if (elem.selector) {
-				tree.push({selector: elem.selector, declarations: []});
-			} else if (elem.children != "") {
-				var childSelector = elem.children.toString();
-				tree[parent].children = {selector: childSelector, declarations: [], children: {}};
-			} else if (elem.declaration.length >= 1) {
-				var value = elem.declaration.toString();
-				
-				// replace variables
-				for (; i < variables.length; i++) {
-					var one = variables[i][0].trim(),
-						two = variables[i][1].replace(';', '').trim();
-					value = value.replace(one, two);
-				}
-				
-				if (tree[parent].children) {
-					tree[parent].children.declarations.push(value);
-				} else {
-					tree[parent].declarations.push(value);
-				}
-			} else if (elem.isChild) {
-				console.log("child!");
-			}*/
 			
 		});
 
