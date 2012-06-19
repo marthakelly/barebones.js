@@ -93,15 +93,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 			if (elem.child && elem.children != "") {
 
-				var recursion = function (parent) {
+				var nesting = function (parent) {
 					if ( isEmpty(parent.children) ) {
 						parent.children = { selector: elem.children.toString(), declarations: [], children: {} };
 					} else {
-						recursion(parent.children);
+						nesting(parent.children);
 					}
 				};
 
-				recursion(tree[parent]);
+				nesting(tree[parent]);
 			}
 			
 		});
