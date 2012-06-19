@@ -7,7 +7,7 @@ var fs = require('fs'),
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
-	var dataFormatter = function (data) {	
+	var init = function (data) {	
 		return data.map(function(line) {	
 			var selector,
 				declaration,
@@ -46,28 +46,48 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	};
 
-	var cssFormatter = function (data) {
+	var treeFormat = function (data) {
+				
 		var tree = [],
 			variables = [],
 			// helper
 			isEmpty = function(obj) {
 			  return Object.keys(obj).length === 0;
 			};
-							
-		data.map(function(elem) {
+
+		data.map(function(elem, i) {
 			var parent = tree.length-1;
-									
-			// separate out variables
+
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
 			}
 			
-			if (elem.selector) {				
-				tree.push({ selector: elem.selector, declarations: [], children: {} });
+			if (elem.selector) {
+				var declarations = [];				
+				var findDeclarations = function (i) {
+					
+					var index = i + 1;
+					
+					console.log(data[index].declaration.toString());
+								
+					if (data[index].declaration.length >= 1) {
+						/*declarations.push(data[index].declaration);
+						findDeclarations(i + 1);*/
+						console.log(index.declaration, "i think this is okay?");
+					} else {
+						console.log(i, " this a selector?");
+					}
+					
+				};
+				
+				findDeclarations(i);
+
+				tree.push({ selector: elem.selector, declarations: declarations, children: {} });
+
 			}
 			
 			// I need to remove that empty string children before the data gets to the CSS formatter...
-			// until then this is my janky fallback
+			// until then elem.children != "" is my janky fallback
 			
 			if (elem.isChild && elem.children != "") {
 
@@ -87,20 +107,20 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var display = function (tree) {
+	var cssFormat = function (tree) {
 		return tree.map(function(elem){
 			return elem.selector + " {" + "\n" + elem.declarations.join("; \n") + ';' + '\n' + '}';
 		});	
 	};
 	
 	// stringify
-	console.log(JSON.stringify(cssFormatter(dataFormatter(data.split('\n'))), undefined, 2));
+	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 	
-	// console.log(dataFormatter(data.split('\n')));
+	// console.log(init(data.split('\n')));
 		
-	var dataFormatter = dataFormatter(data.split('\n'));
+	var init = init(data.split('\n'));
 	
-	var output = (display(cssFormatter(dataFormatter))).join('\n');
+	var output = (cssFormat(treeFormat(init))).join('\n');
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
