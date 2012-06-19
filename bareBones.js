@@ -53,27 +53,38 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			isEmpty = function(obj) {
 			  return Object.keys(obj).length === 0;
 			};
+			
+		// console.log(data);
 
 		data.forEach(function(elem, i) {
 			var parent = tree.length-1;
-
+			
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
-			}
+			}			
 			
 			if (elem.selector) {
 				var declarations = [],
-					inc = i++;
+					index = i + 1;
 				
-					findDeclarations = function (i) {
-						if (data[i].declaration.length) {
-							declarations.push(data[i].declaration.toString());
-							findDeclarations(inc);
-						}
-					};
+				var findDeclarations = function (index) {
+					console.log(data[index]);
 					
-				findDeclarations(i);
-
+					if (typeof data[index] === 'undefined') {
+						return;
+					} else if (data[index].declaration.length) {
+						declarations.push(data[index].declaration.toString());
+						index = index + 1;
+						findDeclarations(index);
+						console.log('you did it!');
+					} else {
+						console.log('wut');
+					}
+					
+				}; 
+					
+				findDeclarations(index);
+				
 				tree.push({ selector: elem.selector, declarations: declarations, children: {} });
 			}
 			
@@ -105,7 +116,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	// stringify
-	console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
+	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 	
 	// console.log(init(data.split('\n')));
 		
