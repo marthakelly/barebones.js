@@ -16,13 +16,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				variable,
 				properties = [],
 				children = [],
-				isChild = false;
-								
-			// qualifiers
+				child = false;
+
 			/^\s/.test(line) ? indent = true : indent = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
-						
+
 			if (line.charAt(0) === '@') {
 				variable = line;
 			} else if (indent === false && !(line.charAt(0) === "@")) {
@@ -31,7 +30,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				properties.push(line);	
 			} else if (indent === true && property === false) {
 				children.push(line.trimLeft());
-				isChild = true;
+				child = true;
 			}
 			
 			return {
@@ -39,7 +38,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				selector: selector,
 				declaration: properties,
 				children: children,
-				isChild: isChild
+				child: child
 			};
 			
 		});
@@ -47,7 +46,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 
 	var treeFormat = function (data) {
-				
+
 		var tree = [],
 			variables = [],
 			// helper
@@ -55,7 +54,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			  return Object.keys(obj).length === 0;
 			};
 
-		data.map(function(elem, i) {
+		data.forEach(function(elem, i) {
 			var parent = tree.length-1;
 
 			if (elem.variable) {
@@ -63,33 +62,25 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			}
 			
 			if (elem.selector) {
-				var declarations = [];				
-				var findDeclarations = function (i) {
-					
-					var index = i + 1;
-					
-					console.log(data[index].declaration.toString());
-								
-					if (data[index].declaration.length >= 1) {
-						/*declarations.push(data[index].declaration);
-						findDeclarations(i + 1);*/
-						console.log(index.declaration, "i think this is okay?");
-					} else {
-						console.log(i, " this a selector?");
-					}
-					
-				};
+				var declarations = [],
+					inc = i++;
 				
+					findDeclarations = function (i) {
+						if (data[i].declaration.length) {
+							declarations.push(data[i].declaration.toString());
+							findDeclarations(inc);
+						}
+					};
+					
 				findDeclarations(i);
 
 				tree.push({ selector: elem.selector, declarations: declarations, children: {} });
-
 			}
 			
 			// I need to remove that empty string children before the data gets to the CSS formatter...
 			// until then elem.children != "" is my janky fallback
 			
-			if (elem.isChild && elem.children != "") {
+			if (elem.child && elem.children != "") {
 
 				var recursion = function (parent) {
 					if ( isEmpty(parent.children) ) {
@@ -98,8 +89,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 						recursion(parent.children);
 					}
 				};
-							
-				recursion(tree[parent]); 
+
+				recursion(tree[parent]);
 			}
 			
 		});
@@ -114,7 +105,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	// stringify
-	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
+	console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 	
 	// console.log(init(data.split('\n')));
 		
