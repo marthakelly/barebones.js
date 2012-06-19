@@ -68,19 +68,13 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					index = i + 1;
 				
 				var findDeclarations = function (index) {
-					console.log(data[index]);
-					
 					if (typeof data[index] === 'undefined') {
 						return;
 					} else if (data[index].declaration.length) {
 						declarations.push(data[index].declaration.toString());
 						index = index + 1;
 						findDeclarations(index);
-						console.log('you did it!');
-					} else {
-						console.log('wut');
-					}
-					
+					} 
 				}; 
 					
 				findDeclarations(index);
@@ -94,8 +88,26 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (elem.child && elem.children != "") {
 
 				var nesting = function (parent) {
+					var declarations = [],
+						index = elem.children;
+					
+					
+					/// work in progress	
+					var findDeclarations = function (index) {
+						if (typeof data[index] === 'undefined') {
+							return;
+						} else if (data[index].declaration.length) {
+							declarations.push(data[index].declaration.toString());
+							index = index + 1;
+							findDeclarations(index);
+						} 
+					}; 
+
+					findDeclarations(index);
+					// end work in progress
+					
 					if ( isEmpty(parent.children) ) {
-						parent.children = { selector: elem.children.toString(), declarations: [], children: {} };
+						parent.children = { selector: elem.children.toString(), declarations: declarations, children: {} };
 					} else {
 						nesting(parent.children);
 					}
