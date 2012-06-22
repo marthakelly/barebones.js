@@ -23,7 +23,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				properties = [],
 				children = [],
 				child = false;
-							
+				
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
@@ -152,7 +152,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (isEmpty(elem.children)) {
 				block = sel + beginBlock + dec + endBlock;
 			} else {
-				var childSel = elem.children.selector,
+				var childSel = elem.children.selector.trim(),
 					childDec = elem.children.declarations.join("; \n") + ";";
 					
 				parents.push(elem.selector);
