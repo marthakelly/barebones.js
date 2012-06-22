@@ -136,6 +136,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	var cssFormat = function (tree) {		
+		
+		// tconsole.log(tree);
+		
 		return tree.map(function(elem, i){
 			
 			var beginBlock = " {" + "\n",
@@ -156,6 +159,29 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				
 				block = sel + beginBlock + dec + endBlock;
 				children = "\n" + parents.join(" ") + " " + childSel + beginBlock + childDec + endBlock;
+				
+				// console.log(elem);
+				
+				// some kind of recursion here 
+				
+				var listChildren = function(elem) {
+					var hasChildren = '.children';
+					
+					console.log(elem);
+					
+					if (elem.hasChildren) {
+						hasChildren = hasChildren + hasChildren;
+						listChildren(elem.hasChildren);
+					} else {
+						return;
+					}
+				}
+				
+				listChildren(elem);
+				
+				/*for (children in elem) {
+					console.log(Object.getPrototypeOf(elem).children);
+				}*/
 			}
 			
 			return children ? block + children : block;
