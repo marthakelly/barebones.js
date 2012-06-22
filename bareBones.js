@@ -135,10 +135,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var cssFormat = function (tree) {
-		
-		// console.log(tree);
-		
+	var cssFormat = function (tree) {		
 		return tree.map(function(elem, i){
 			
 			var beginBlock = " {" + "\n",
