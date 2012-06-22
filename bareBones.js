@@ -165,13 +165,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				// some kind of recursion here 
 				
 				var listChildren = function(elem) {
-					var hasChildren = '.children';
+					var hasChildren = 'children';
 					
-					console.log(elem);
+					// console.log(elem[hasChildren][hasChildren]);
 					
-					if (elem.hasChildren) {
-						hasChildren = hasChildren + hasChildren;
-						listChildren(elem.hasChildren);
+					if (elem[hasChildren]) {
+						console.log(elem);
+						//hasChildren = hasChildren + "." + hasChildren;
+						//listChildren(elem[hasChildren]);
 					} else {
 						return;
 					}
