@@ -47,6 +47,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 	var treeFormat = function (data) {
 
+		// console.log(data);
+
 		var tree = [],
 			variables = [],
 			// helper
@@ -87,23 +89,26 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 			if (elem.child && elem.children != "") {
 
-				var nesting = function (parent) {
-					var declarations = [],
-						index = elem.children;
-					
+				// console.log(elem, i);
+
+				var nesting = function (parent) {					
+					var declarations = [];
+					console.log(declarations);
 					
 					/// work in progress	
-					var findDeclarations = function (index) {
-						if (typeof data[index] === 'undefined') {
+					var findDeclarations = function (i) {
+						
+						i++
+						
+						if (data[i].declaration.length === 0) {
 							return;
-						} else if (data[index].declaration.length) {
-							declarations.push(data[index].declaration.toString());
-							index = index + 1;
-							findDeclarations(index);
+						} else {
+							declarations.push(data[i].declaration.toString());
+							findDeclarations(i);
 						} 
 					}; 
 
-					findDeclarations(index);
+					findDeclarations(i);
 					// end work in progress
 					
 					if ( isEmpty(parent.children) ) {
@@ -128,7 +133,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	// stringify
-	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
+	console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 	
 	// console.log(init(data.split('\n')));
 		
