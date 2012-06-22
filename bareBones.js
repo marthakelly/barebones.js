@@ -166,15 +166,11 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		});
 	};
 	
-	// stringify
+	// stringify the whole data array
 	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
-	
-	// console.log(init(data.split('\n')));
 		
 	var init = init(data.split('\n'));
-	
-	// console.log(cssFormat(treeFormat(init)));
-	
+		
 	var output = (cssFormat(treeFormat(init))).join('\n');
 
 	fs.writeFile(css, output, function(err) {
