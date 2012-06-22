@@ -33,11 +33,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					index = last['index'];
 								
 				whiteSpace = line.substr(0, index);
-				
-				console.log(index);
-				
-				
-				// whiteSpace = line.substr('/^\s\s*/', '/^\s\s*/');
 			}
 			
 			if (line.charAt(0) === '@') {
@@ -84,7 +79,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					if (typeof data[index] === 'undefined') {
 						return;
 					} else if (data[index].declaration.length) {
-						declarations.push(data[index].declaration.toString());
+						var value = data[index].declaration.toString();
+						// replace variables
+						for (var i = 0; i < variables.length; i++) {
+							var one = variables[i][0].trim(),
+								two = variables[i][1].replace(';', '').trim();
+							value = value.replace(one, two);
+						}
+								
+						declarations.push(value);
 						index = index + 1;
 						findDeclarations(index);
 					} 
