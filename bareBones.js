@@ -11,28 +11,42 @@ var fs = require('fs'),
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
-	var init = function (data) {	
-		return data.map(function(line) {	
+	var whiteSpace;
+		
+	var init = function (data) {			
+		return data.map(function(line, i) {	
 			var selector,
 				declaration,
-				indent,
+				indentExists,
 				property,
 				variable,
 				properties = [],
 				children = [],
 				child = false;
-
-			/^\s/.test(line) ? indent = true : indent = false;
+							
+			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
-
+			
+			if (typeof whiteSpace === "undefined" && property === true) {
+				var last = line.match('[a-zA-z]'),
+					index = last['index'];
+								
+				whiteSpace = line.substr(0, index);
+				
+				console.log(index);
+				
+				
+				// whiteSpace = line.substr('/^\s\s*/', '/^\s\s*/');
+			}
+			
 			if (line.charAt(0) === '@') {
 				variable = line;
-			} else if (indent === false && !(line.charAt(0) === "@")) {
+			} else if (indentExists === false && !(line.charAt(0) === "@")) {
 				selector = line;
 			} else if (property === true) {
-				properties.push(line);	
-			} else if (indent === true && property === false) {
+				properties.push(whiteSpace + line.trimLeft());	
+			} else if (indentExists === true && property === false) {
 				children.push(line.trimLeft());
 				child = true;
 			}
