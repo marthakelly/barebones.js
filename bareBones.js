@@ -2,7 +2,11 @@
 
 var fs = require('fs'),
 	bare = process.argv.splice(2)[0],
-	css = bare.substring(0, bare.lastIndexOf('.')) + '.css';
+	css = bare.substring(0, bare.lastIndexOf('.')) + '.css',
+	// helper
+	isEmpty = function(obj) {
+	  return Object.keys(obj).length === 0;
+	};
 
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
@@ -46,15 +50,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 
 	var treeFormat = function (data) {
-
-		// console.log(data);
-
 		var tree = [],
-			variables = [],
-			// helper
-			isEmpty = function(obj) {
-			  return Object.keys(obj).length === 0;
-			};
+			variables = [];
 			
 		// console.log(data);
 
@@ -85,33 +82,28 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			}
 			
 			// I need to remove that empty string children before the data gets to the CSS formatter...
-			// until then elem.children != "" is my janky fallback
+			// until then elem.children != "" is my fallback :/
 			
 			if (elem.child && elem.children != "") {
 
 				// console.log(elem, i);
 
-				var nesting = function (parent) {					
-					var declarations = [];
-					console.log(declarations);
-					
-					/// work in progress	
-					var findDeclarations = function (i) {
-						
-						i++
-						
-						if (data[i].declaration.length === 0) {
-							return;
-						} else {
-							declarations.push(data[i].declaration.toString());
-							findDeclarations(i);
-						} 
-					}; 
+				var nesting = function (parent) {
+					var declarations = [],
+						parents,
+						findDeclarations = function (i) {
+							i++	
+							if (data[i].declaration.length === 0) {
+								return;
+							} else {
+								declarations.push(data[i].declaration.toString());
+								findDeclarations(i);
+							} 
+						}; 
 
 					findDeclarations(i);
-					// end work in progress
 					
-					if ( isEmpty(parent.children) ) {
+					if (isEmpty(parent.children)) {
 						parent.children = { selector: elem.children.toString(), declarations: declarations, children: {} };
 					} else {
 						nesting(parent.children);
@@ -127,17 +119,44 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	var cssFormat = function (tree) {
-		return tree.map(function(elem){
-			return elem.selector + " {" + "\n" + elem.declarations.join("; \n") + ';' + '\n' + '}';
-		});	
+		
+		// console.log(tree);
+		
+		return tree.map(function(elem, i){
+			
+			var beginBlock = " {" + "\n",
+				endBlock = "\n" + "}",
+				sel = elem.selector,
+				dec = elem.declarations.join("; \n") + ";",
+				parents = [],
+				block,
+				children;
+				
+			if (isEmpty(elem.children)) {
+				block = sel + beginBlock + dec + endBlock;
+			} else {
+				var childSel = elem.children.selector,
+					childDec = elem.children.declarations.join("; \n") + ";";
+					
+				parents.push(elem.selector);
+				
+				block = sel + beginBlock + dec + endBlock;
+				children = "\n" + parents.join(" ") + " " + childSel + beginBlock + childDec + endBlock;
+			}
+			
+			return children ? block + children : block;
+			
+		});
 	};
 	
 	// stringify
-	console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
+	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 	
 	// console.log(init(data.split('\n')));
 		
 	var init = init(data.split('\n'));
+	
+	// console.log(cssFormat(treeFormat(init)));
 	
 	var output = (cssFormat(treeFormat(init))).join('\n');
 
