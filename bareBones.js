@@ -29,8 +29,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			line.search(':') != "-1" ? property = true : property = false;
 			
 			if (typeof whiteSpace === "undefined" && property === true) {
-				var last = line.match('[a-zA-z]'),
-					index = last['index'];
+				var firstChar = line.match('[a-zA-z]'),
+					index = firstChar['index'];
 								
 				whiteSpace = line.substr(0, index);
 			}
