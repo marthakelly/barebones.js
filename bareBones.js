@@ -3,7 +3,7 @@
 var fs = require('fs'),
 	bare = process.argv.splice(2)[0],
 	css = bare.substring(0, bare.lastIndexOf('.')) + '.css',
-	// helper
+	// global helper
 	isEmpty = function(obj) {
 	  return Object.keys(obj).length === 0;
 	};
@@ -61,7 +61,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	};
 	
-	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children (if applicable)
+	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
 
 	var treeFormat = function (data) {
 		var tree = [],
@@ -101,7 +101,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				tree.push({ selector: elem.selector, declarations: declarations, children: {} });
 			}
 			
-			// I need to remove that empty string children before the data gets to the CSS formatter...
+			// I need to remove the empty string children before the data gets to the CSS formatter...
 			// until then elem.children != "" is my fallback :/
 			
 			if (elem.child && elem.children != "") {
@@ -169,7 +169,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var output = (cssFormat(treeFormat(init))).join('\n');
 	
-	// stringify the whole data array
+	// stringify the final data array
 	console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
 	fs.writeFile(css, output, function(err) {
