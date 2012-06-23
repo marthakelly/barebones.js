@@ -62,8 +62,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		var tree = [],
 			variables = [];
 			
-		// console.log(data);
-
 		data.forEach(function(elem, i) {
 			var parent = tree.length-1;
 			
@@ -103,8 +101,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 			if (elem.child && elem.children != "") {
 
-				// console.log(elem, i);
-
 				var nesting = function (parent) {
 					var declarations = [],
 						parents,
@@ -135,12 +131,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var cssFormat = function (tree) {		
-		
-		// tconsole.log(tree);
-		
-		return tree.map(function(elem, i){
-			
+	var cssFormat = function (tree) {				
+		return tree.map(function(elem, i){		
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
 				sel = elem.selector,
@@ -154,48 +146,24 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			} else {
 				var childSel = elem.children.selector.trim(),
 					childDec = elem.children.declarations.join("; \n") + ";";
-					
-				parents.push(elem.selector);
 				
+				parents.push(elem.selector);
+			
 				block = sel + beginBlock + dec + endBlock;
 				children = "\n" + parents.join(" ") + " " + childSel + beginBlock + childDec + endBlock;
-				
-				// console.log(elem);
-				
-				// some kind of recursion here 
-				
-				var listChildren = function(elem) {
-					var hasChildren = 'children';
-					
-					// console.log(elem[hasChildren][hasChildren]);
-					
-					if (elem[hasChildren]) {
-						console.log(elem);
-						//hasChildren = hasChildren + "." + hasChildren;
-						//listChildren(elem[hasChildren]);
-					} else {
-						return;
-					}
-				}
-				
-				listChildren(elem);
-				
-				/*for (children in elem) {
-					console.log(Object.getPrototypeOf(elem).children);
-				}*/
 			}
 			
 			return children ? block + children : block;
 			
 		});
 	};
-	
-	// stringify the whole data array
-	// console.log(JSON.stringify(treeFormat(init(data.split('\n'))), undefined, 2));
 		
 	var init = init(data.split('\n'));
 		
 	var output = (cssFormat(treeFormat(init))).join('\n');
+	
+	// stringify the whole data array
+	console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
