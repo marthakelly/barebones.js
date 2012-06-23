@@ -12,7 +12,10 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
 	var whiteSpace;
-		
+	
+	// init turns the data from the .bare file into an array of objects
+	// each object describes what part of a CSS block the line is
+	
 	var init = function (data) {			
 		return data.map(function(line, i) {	
 			var selector,
@@ -57,6 +60,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		});
 		
 	};
+	
+	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children (if applicable)
 
 	var treeFormat = function (data) {
 		var tree = [],
@@ -131,7 +136,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var cssFormat = function (tree) {				
+	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
+	
+	var cssFormat = function (tree) {
 		return tree.map(function(elem, i){		
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
