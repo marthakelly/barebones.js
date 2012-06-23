@@ -23,9 +23,18 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				indentExists,
 				property,
 				variable,
+				indentLevel = 0,
 				properties = [],
 				children = [],
 				child = false;
+			
+			var firstChar = line.match('[a-zA-Z\.\#\@]+');
+			
+			if (firstChar !== null) {
+				var index = firstChar['index'];
+			}
+
+			indentLevel = index;
 				
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
@@ -54,7 +63,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				selector: selector,
 				declaration: properties,
 				children: children,
-				child: child
+				child: child,
+				indentLevel: indentLevel
 			};
 			
 		});
@@ -64,6 +74,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
 
 	var treeFormat = function (data) {
+		
+		console.log(data);
+		
 		var tree = [],
 			variables = [];
 			
@@ -139,6 +152,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
 	
 	var cssFormat = function (tree) {
+		
+		// console.log(tree);
+		
 		return tree.map(function(elem, i){		
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
@@ -151,6 +167,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (isEmpty(elem.children)) {
 				block = sel + beginBlock + dec + endBlock;
 			} else {
+								
+				// run all this code
+				// check for existance of children on this child object
+				// if it exists do it again
+				// else return
+				
 				var childSel = elem.children.selector.trim(),
 					childDec = elem.children.declarations.join("; \n") + ";";
 				
@@ -170,7 +192,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	var output = (cssFormat(treeFormat(init))).join('\n');
 	
 	// stringify the final data array
-	console.log(JSON.stringify(treeFormat(init), undefined, 2));
+	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
