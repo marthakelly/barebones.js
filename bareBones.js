@@ -113,7 +113,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 				findDeclarations(index);
 				
-				tree.push({ selector: elem.selector, declarations: declarations, children: {}, indent: indent });
+				tree.push({ indent: indent, selector: elem.selector, declarations: declarations, children: {} });
 			}
 			
 			// I need to remove the empty string children before the data gets to the CSS formatter...
@@ -132,7 +132,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 								return;
 							} else {
 								declarations.push(data[i].declaration.toString());
-								parents.push('hai');
 								findDeclarations(i);
 							} 
 						}; 
@@ -140,7 +139,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					findDeclarations(i);
 					
 					if (isEmpty(parent.children) ) {
-						parent.children = { selector: elem.children.toString(), declarations: declarations, children: {}, parents: parents, indent: indent};
+						parents.push(parent.selector);
+						parent.children = { parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} };
 					} else {
 						nesting(parent.children);
 					}
@@ -165,10 +165,10 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				endBlock = "\n" + "}",
 				sel = elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
-				parents = [],
+				parents = elem.children.parents,
 				block,
 				children;
-				
+								
 			if (isEmpty(elem.children)) {
 				block = sel + beginBlock + dec + endBlock;
 			} else {
@@ -180,11 +180,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				
 				var childSel = elem.children.selector.trim(),
 					childDec = elem.children.declarations.join("; \n") + ";";
-				
-				parents.push(elem.selector);
-			
+							
 				block = sel + beginBlock + dec + endBlock;
-				children = "\n" + parents.join(" ") + " " + childSel + beginBlock + childDec + endBlock;
+				children = "\n" + parents + " " + childSel + beginBlock + childDec + endBlock;
 			}
 			
 			return children ? block + children : block;
