@@ -131,7 +131,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 							if (data[i].declaration.length === 0) {
 								return;
 							} else {
-								declarations.push(data[i].declaration.toString());
+								var value = data[i].declaration.toString();
+								// replace variables
+								for (var i = 0; i < variables.length; i++) {
+									var one = variables[i][0].trim(),
+										two = variables[i][1].replace(';', '').trim();
+									value = value.replace(one, two);
+								}
+								
+								declarations.push(value);
 								findDeclarations(i);
 							} 
 						}; 
