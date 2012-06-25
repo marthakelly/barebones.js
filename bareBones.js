@@ -113,7 +113,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 				findDeclarations(index);
 				
-				tree.push({ indent: indent, selector: elem.selector, declarations: declarations, children: {} });
+				tree.push({ indent: indent, selector: elem.selector, declarations: declarations });
 			}
 
 			// I need to remove the empty string children before the data gets to the CSS formatter...
@@ -147,14 +147,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 					
-					if (isEmpty(parent.children) ) {
-						parents.push(parent.selector);
-						//parent.children = { parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} };
-						tree.push({ parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} })
-					} else {
+					parents.push(parent.selector);
+					tree.push({ parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations })
 						
-						nesting(parent.children);
-					}
 				};
 
 				nesting(tree[parent]);
@@ -176,27 +171,13 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				endBlock = "\n" + "}",
 				sel = elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
-				parents = elem.children.parents,
+				parents = elem.parents || "",
 				block,
 				children;
-								
-			if (isEmpty(elem.children)) {
-				block = sel + beginBlock + dec + endBlock;
-			} else {
-								
-				// run all this code
-				// check for existance of children on this child object
-				// if it exists do it again
-				// else return
-				
-				var childSel = elem.children.selector.trim(),
-					childDec = elem.children.declarations.join("; \n") + ";";
 							
-				block = sel + beginBlock + dec + endBlock;
-				children = "\n" + parents + " " + childSel + beginBlock + childDec + endBlock;
-			}
+				block = parents + sel + beginBlock + dec + endBlock;
 			
-			return children ? block + children : block;
+			return block
 			
 		});
 	};
