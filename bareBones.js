@@ -140,7 +140,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 					if (isEmpty(parent.children) ) {
 						parents.push(parent.selector);
-						parent.children = { parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} };
+						//parent.children = { parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} };
+						tree.push({ parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} })
 					} else {
 						
 						nesting(parent.children);
