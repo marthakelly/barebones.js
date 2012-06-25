@@ -132,10 +132,11 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 								return;
 							} else {
 								var value = data[i].declaration.toString();
+								
 								// replace variables
-								for (var i = 0; i < variables.length; i++) {
-									var one = variables[i][0].trim(),
-										two = variables[i][1].replace(';', '').trim();
+								for (var j = 0; j < variables.length; j++) {
+									var one = variables[j][0].trim(),
+										two = variables[j][1].replace(';', '').trim();
 									value = value.replace(one, two);
 								}
 								
