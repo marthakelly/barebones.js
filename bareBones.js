@@ -150,7 +150,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 
-					tree.push({ parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations })
+					tree.push({ parents: [], indent: indent, selector: elem.children.toString(), declarations: declarations })
 					
 				};
 
@@ -174,7 +174,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					 if (elem.indent > tree[i].indent) {
 						elem.parents.push(tree[i].selector);
 						if (tree[i].parents){
-							elem.parents.push(tree[i].parents.toString());
+							elem.parents.push(tree[i].parents.join());
 						}
 					}
 				};
@@ -216,7 +216,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var init = init(data.split('\n'));
 		
-	var output = (cssFormat(treeFormat(init))).join('\n');
+	var output = (cssFormat(findParents(treeFormat(init)))).join('\n');
 	
 	var test = findParents(treeFormat(init));
 	
