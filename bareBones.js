@@ -115,7 +115,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				
 				tree.push({ indent: indent, selector: elem.selector, declarations: declarations, children: {} });
 			}
-			
+
 			// I need to remove the empty string children before the data gets to the CSS formatter...
 			// until then elem.children != "" is my fallback :/
 			
@@ -142,6 +142,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 						parents.push(parent.selector);
 						parent.children = { parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations, children: {} };
 					} else {
+						
 						nesting(parent.children);
 					}
 				};
