@@ -7,7 +7,7 @@ var fs = require('fs'),
 	isEmpty = function(obj) {
 	  return Object.keys(obj).length === 0;
 	};
-
+	
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
@@ -82,6 +82,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			variables = [];
 			
 		data.forEach(function(elem, i) {
+		
 			var parent = tree.length-1,
 				indent = data[i].indentLevel;
 			
@@ -89,7 +90,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				variables.push(elem.variable.split('='));
 			}			
 			
-			if (elem.selector) {
+			if (elem.selector) {				
 				var declarations = [],
 					index = i + 1;
 				
@@ -120,11 +121,11 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			// until then elem.children != "" is my fallback :/
 			
 			if (elem.child && elem.children != "") {
-
-				var nesting = function (parent) {
+								
+				var findChildren = function (parent, elem) {
+					
 					var declarations = [],
-						parents = [],
-						indent = data[i].indentLevel;
+						parents = [];
 					
 						findDeclarations = function (i) {
 							i++	
@@ -142,21 +143,52 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 								
 								declarations.push(value);
 								findDeclarations(i);
-							} 
-						}; 
+							}
+						};
+					
+					// parents.push(parent.selector);
 
 					findDeclarations(i);
-					
-					parents.push(parent.selector);
+
 					tree.push({ parents: parents, indent: indent, selector: elem.children.toString(), declarations: declarations })
-						
+					
 				};
 
-				nesting(tree[parent]);
+				findChildren(tree[parent], elem);
+				
 			}
 			
 		});
+	
+		return tree;
+	};
+	
+	var findParents = function(tree) {		
+		tree.forEach(function(elem, i){	
+			
+			if (!elem.indent) {
+				return;
+			} else {
+				var stuff = function(elem){
+					i--
+					 if (elem.indent > tree[i].indent) {
+						elem.parents.push(tree[i].selector);
+						if (tree[i].parents){
+							elem.parents.push(tree[i].parents.toString());
+						}
+					}
+				};
+			}
+			
+			stuff(elem);
+			
+		// if element's indentation is greater than the index before it
+		// push the index before it's selector into the parents array
+		// do this recursively until this is false
+		// push parents array into element
 
+		});
+		
 		return tree;
 	};
 	
@@ -186,8 +218,13 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var output = (cssFormat(treeFormat(init))).join('\n');
 	
+	var test = findParents(treeFormat(init));
+	
 	// stringify the final data array
-	console.log(JSON.stringify(treeFormat(init), undefined, 2));
+	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
+
+	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
