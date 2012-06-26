@@ -185,7 +185,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					} else if (elem.indent < tree[i].indent){
 						var findMe = function(i) {
 							i--
-							if (elem.indent > tree[i].indent) {
+							if (elem.indent === tree[i].indent) {
 								elem.parents.push(tree[i].selector);
 							} else {
 								findMe(i);
