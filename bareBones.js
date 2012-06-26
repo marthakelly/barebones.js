@@ -178,8 +178,10 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	var findParents = function(tree) {	
 
 		// console.log(tree);
+		
+		var newTree = [];
 
-		tree.forEach(function(elem, i){
+		tree.map(function(elem, i){
 
 
 			var inc = i+1,
@@ -192,6 +194,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					return;
 				} else if (tree[i].indentLevel === level) {
 					tree[i].children.push(elem);
+					return;
 				} else {
 					find(level);
 				}
@@ -200,20 +203,24 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (!tree[inc]) {
 				return;
 			}
-
-			/*if (elem.indentLevel === "init") {
-				return;
-			}*/
+			
+			if (tree[i].indentLevel === "init") {
+				newTree.push(tree[i]);
+			}
 
 			if (elem.indentLevel === 1) {
 				find("init");
 			} 
+			
+			if (elem.indentLevel === 2) {
+				
+			}
 
 
 
 		});
-
-		return tree;
+		
+		return newTree;
 	};
 	
 	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
@@ -245,7 +252,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
 	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
-
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
