@@ -31,19 +31,16 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				child = false;
 			
 			var firstChar = line.match('[a-zA-Z\.\#\@]+');
-			
-			
+						
 			if (firstChar !== null) {
-				var spaces = firstChar['index'];
-				if (typeof unit === "undefined" && spaces) {
-					unit = spaces;
+				var numSpaces = firstChar['index'];
+				if (typeof unit === "undefined" && numSpaces) {
+					unit = numSpaces;
 				}
 			}
 			
-			if (!spaces) {
-				indentLevel = 0;
-			} else {
-				indentLevel = spaces/unit;
+			if (typeof unit !== "undefined") {
+				indentLevel = numSpaces/unit;
 			}
 							
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
