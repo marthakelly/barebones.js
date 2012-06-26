@@ -92,8 +92,9 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 			if (elem.selector) {				
 				var declarations = [],
-					index = i + 1;
-				
+					index = i + 1,
+					selector = elem.selector;
+									
 				var findDeclarations = function (index) {
 					if (typeof data[index] === 'undefined') {
 						return;
@@ -114,7 +115,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 				findDeclarations(index);
 				
-				tree.push({ indent: indent, selector: elem.selector, declarations: declarations });
+				tree.push({ indent: indent, selector: selector, declarations: declarations });
 			}
 
 			// I need to remove the empty string children before the data gets to the CSS formatter...
@@ -165,6 +166,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	var findParents = function(tree) {		
 		tree.forEach(function(elem, i){	
+			var parent;
 			
 			if (!elem.indent) {
 				return;
@@ -173,9 +175,13 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					i--
 					 if (elem.indent > tree[i].indent) {
 						elem.parents.push(tree[i].selector);
+
 						if (tree[i].parents){
-							elem.parents.push(tree[i].parents.join());
+							parent = tree[i].parents.join(" ");
+							elem.parents.unshift(parent);
 						}
+					} else {
+						console.log('wat');
 					}
 				};
 			}
@@ -196,14 +202,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	var cssFormat = function (tree) {
 		
-		// console.log(tree);
-		
+		console.log(tree);
+				
 		return tree.map(function(elem, i){		
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
 				sel = elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
-				parents = elem.parents || "",
+				parents = elem.parents ? elem.parents.join(" ") : "",
 				block,
 				children;
 							
@@ -218,12 +224,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var output = (cssFormat(findParents(treeFormat(init)))).join('\n');
 	
-	var test = findParents(treeFormat(init));
+	// var test = findParents(treeFormat(init));
 	
 	// stringify the final data array
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
-	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
 
 
 	fs.writeFile(css, output, function(err) {
