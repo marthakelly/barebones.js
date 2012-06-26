@@ -42,15 +42,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (typeof unit !== "undefined") {
 				indentLevel = numSpaces/unit;
 			}
-							
-			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
-			line.search(':') != "-1" ? property = true : property = false;
+			indentExists = /^\s/.test(line);
+			
+			property = line.search(':') != "-1";
 			
 			if (typeof whiteSpace === "undefined" && property === true) {
-				var firstChar = line.match('[a-zA-z]'),
-					index = firstChar['index'];
-				whiteSpace = line.substr(0, index);
+				firstChar = line.match('[a-zA-z]');
+				whiteSpace = line.substr(0, firstChar['index']);
 			}
 			
 			if (line.charAt(0) === '@') {
@@ -77,23 +76,35 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	};
 	
-	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
+	// treeFormat takes the lineObjects array (of objects) and produces an array of objects used to generate CSS blocks
 
 	var treeFormat = function (lineObjects) {
 
 		// console.log(lineObjects);
 
 		var tree = [],
-			variables = [];
+			variables = {};
 
 		lineObjects.forEach(function(elem, i) {
 
 			var parent = tree.length-1,
-				indent = lineObjects[i].indentLevel;
+				indent = lineObjects[i].indentLevel,
+				varName,
+				varVal,
+				variableSplit,
+				line;
 
 			if (elem.variable) {
-				variables.push(elem.variable.split('='));
+				variableSplit = elem.variable.split('=');
+				
+				varName = variableSplit[0].trim();
+				varVal = variableSplit[1].replace(';', '').trim();
+				
+				variables[varName] = varVal;
+				
 			}			
+			
+			console.log(variables);
 
 			if (elem.selector) {				
 				var declarations = [],
@@ -104,16 +115,18 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					if (typeof lineObjects[index] === 'undefined') {
 						return;
 					} else if (lineObjects[index].declaration.length) {
-						var value = lineObjects[index].declaration.toString();
-						// replace variables
-						for (var i = 0; i < variables.length; i++) {
-							var one = variables[i][0].trim(),
-								two = variables[i][1].replace(';', '').trim();
-							value = value.replace(one, two);
+						
+						line = lineObjects[index].declaration.toString();
+						
+						for (variable in variables) {
+							if (variables.hasOwnProperty(variable)) {
+								line = line.replace(variable, variables[variable]);
+								console.log("replacing:", variable, 'with:', variables[variable]);
+							}
 						}
 
-						declarations.push(value);
-						index = index + 1;
+						declarations.push(line);
+						index++;
 						findDeclarations(index);
 					} 
 				}; 
