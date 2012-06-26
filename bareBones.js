@@ -222,23 +222,31 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
 	
-	var cssFormat = function (tree) {
+	var holder = [];
+	
+	var cssFormat = function cssFormat (tree, prefix) {
+		
+		prefix = prefix || "";
+		
+		
 		return tree.map(function(elem, i){
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
-				sel = elem.selector,
+				sel = prefix + elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
 				block,
-				children,
-				parents = "LOLOLOL";
-				
-				if (!elem.children.length) {
-					block = sel + beginBlock + dec + endBlock;
-				} else {
-					block = parents + sel + beginBlock + dec + endBlock;
-				}
+				children = "",
+				parents;
 			
-			return block
+			block = sel + beginBlock + dec + endBlock;
+
+			holder.push(JSON.stringify(block, undefined, 2));
+							
+			if (elem.children.length) {
+				children = cssFormat(elem.children, sel);
+			}
+			
+			return block;
 			
 		});
 	};
@@ -247,12 +255,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var output = (cssFormat(findParents(treeFormat(init)))).join('\n');
 	
+	console.log(holder);
+	
 	// var test = findParents(treeFormat(init));
 	
 	// stringify the final data array
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
-	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
 
 	fs.writeFile(css, output, function(err) {
 		if (err) throw err;
