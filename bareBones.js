@@ -11,7 +11,8 @@ var fs = require('fs'),
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
 	
-	var whiteSpace;
+	var whiteSpace,
+		unit;
 	
 	// init turns the data from the .bare file into an array of objects
 	// each object describes what part of a CSS block the line is
@@ -31,11 +32,21 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 			var firstChar = line.match('[a-zA-Z\.\#\@]+');
 			
+			
 			if (firstChar !== null) {
-				var index = firstChar['index'];
+				var spaces = firstChar['index'];
+				if (typeof unit === "undefined" && spaces) {
+					unit = spaces;
+				}
 			}
-	
-			indentLevel = index;
+			
+			if (!spaces) {
+				spaces = "init";
+			} else {
+				spaces = spaces/unit;
+			}
+			
+			indentLevel = spaces;
 				
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
@@ -73,7 +84,10 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
 
-	var treeFormat = function (data) {			
+	var treeFormat = function (data) {
+		
+		// console.log(data);
+					
 		var tree = [],
 			variables = [];
 			
@@ -162,19 +176,20 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	};
 	
 	var findParents = function(tree) {	
-		
+
 		// console.log(tree);
-		
+
 		tree.forEach(function(elem, i){
-						
-			var findChildren = function(elem) {
-			
-				var inc = i+1;
-				
+
+			var appendChildren = function(elem) {
+
+				var inc = i+1,
+					holder;
+
 				if (!tree[inc]) {
 					return;
 				}
-				
+
 				if (!elem.indent) {
 					if (tree[inc]) {
 						if (tree[inc].indent > 0) {
@@ -186,22 +201,22 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 						return;
 					}
 				} 
-				
+
 				if (tree[inc].indent > elem.indent) {
 					elem.children.push(tree[inc]);
 					i++
-					findChildren(elem, i);
-				} else if (tree[inc].indent = elem.indent) {
-					console.log(elem);
+					appendChildren(elem, i);
+				} else if (tree[inc].indent === elem.indent) {
+					// console.log(elem.indent)
 				} else {
 					return;
 				}
 			};
-			
-			findChildren(elem);
-			
+
+			appendChildren(elem);
+
 		});
-		
+
 		return tree;
 	};
 	
@@ -233,7 +248,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// stringify the final data array
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
-	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
 
 
 	fs.writeFile(css, output, function(err) {
