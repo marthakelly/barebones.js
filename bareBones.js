@@ -125,7 +125,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 				findDeclarations(index);
 				
-				tree.push({ indent: indent, selector: selector, declarations: declarations, children: [] });
+				tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
 			// I need to remove the empty string children before the data gets to the CSS formatter...
@@ -162,7 +162,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 
-					tree.push({ indent: indent, selector: selector, declarations: declarations, children: [] })
+					tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
 					
 				};
 
@@ -181,39 +181,35 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 		tree.forEach(function(elem, i){
 
-			var appendChildren = function(elem) {
 
-				var inc = i+1,
-					holder;
-
-				if (!tree[inc]) {
+			var inc = i+1,
+				dec = i-1;
+			
+			var find = function(level) {
+				i--
+				
+				if (!tree[i]) {
 					return;
-				}
-
-				if (!elem.indent) {
-					if (tree[inc]) {
-						if (tree[inc].indent > 0) {
-							elem.children.push(tree[inc]);
-						} else {
-							return;
-						}
-					} else {
-						return;
-					}
-				} 
-
-				if (tree[inc].indent > elem.indent) {
-					elem.children.push(tree[inc]);
-					i++
-					appendChildren(elem, i);
-				} else if (tree[inc].indent === elem.indent) {
-					// console.log(elem.indent)
+				} else if (tree[i].indentLevel === level) {
+					tree[i].children.push(elem);
 				} else {
-					return;
+					find(level);
 				}
 			};
+			
+			if (!tree[inc]) {
+				return;
+			}
 
-			appendChildren(elem);
+			/*if (elem.indentLevel === "init") {
+				return;
+			}*/
+
+			if (elem.indentLevel === 1) {
+				find("init");
+			} 
+
+
 
 		});
 
