@@ -182,8 +182,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		var newTree = [];
 
 		tree.map(function(elem, i){
-
-
 			var inc = i+1,
 				dec = i-1;
 			
@@ -199,11 +197,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					find(level);
 				}
 			};
-			
-			/*if (!tree[inc]) {
-				return;
-			}*/
-			
+
 			if (elem.indentLevel === "init") {
 				newTree.push(elem);
 				return;
@@ -221,8 +215,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				find(3);
 			}
 
-
-
 		});
 		
 		return newTree;
@@ -236,11 +228,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				endBlock = "\n" + "}",
 				sel = elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
-				parents = elem.parents ? elem.parents.join("") : "",
 				block,
-				children;
-							
-				block = parents + sel + beginBlock + dec + endBlock;
+				children,
+				parents = "LOLOLOL";
+				
+				if (!elem.children.length) {
+					block = sel + beginBlock + dec + endBlock;
+				} else {
+					block = parents + sel + beginBlock + dec + endBlock;
+				}
 			
 			return block
 			
