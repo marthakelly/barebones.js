@@ -200,20 +200,25 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				}
 			};
 			
-			if (!tree[inc]) {
+			/*if (!tree[inc]) {
 				return;
-			}
+			}*/
 			
-			if (tree[i].indentLevel === "init") {
-				newTree.push(tree[i]);
+			if (elem.indentLevel === "init") {
+				newTree.push(elem);
+				return;
 			}
 
 			if (elem.indentLevel === 1) {
 				find("init");
 			} 
 			
-			if (elem.indentLevel === 2) {
-				
+			if (elem.indentLevel === 3) {
+				find(1);
+			}
+			
+			if (elem.indentLevel === 4) {
+				find(3);
 			}
 
 
