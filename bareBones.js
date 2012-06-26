@@ -164,15 +164,15 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var findParents = function(tree) {		
-		tree.forEach(function(elem, i){	
+	var findParents = function(tree) {
+		tree.forEach(function(elem, i){
 			var parent,
 				format,
 				selector;
 			if (!elem.indent) {
 				return;
 			} else {
-				var stuff = function(elem){
+				var appendParents = function(elem){
 					i--
 					 if (elem.indent > tree[i].indent) {
 						format = tree[i].selector.trim();
@@ -182,18 +182,20 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 							parent = tree[i].parents.join("");
 							elem.parents.unshift(parent);
 						}
-					} else {
-						console.log('wat');
+					} else if (elem.indent < tree[i].indent){
+						var findMe = function(i) {
+							i--
+							if (elem.indent > tree[i].indent) {
+								elem.parents.push(tree[i].selector);
+							} else {
+								findMe(i);
+							}
+						};
+						findMe(i);
 					}
 				};
 			}
-			stuff(elem);
-			
-		// if element's indentation is greater than the index before it
-		// push the index before it's selector into the parents array
-		// do this recursively until this is false
-		// push parents array into element
-
+			appendParents(elem);
 		});
 		
 		return tree;
@@ -202,10 +204,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
 	
 	var cssFormat = function (tree) {
-		
-		// console.log(tree);
-				
-		return tree.map(function(elem, i){		
+		return tree.map(function(elem, i){
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
 				sel = elem.selector,
@@ -230,7 +229,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// stringify the final data array
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
-	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
 
 
 	fs.writeFile(css, output, function(err) {
