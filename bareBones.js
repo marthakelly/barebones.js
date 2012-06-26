@@ -17,7 +17,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// init turns the data from the .bare file into an array of objects
 	// each object describes what part of a CSS block the line is
 	
-	var init = function (data) {			
+	var processLines = function (data) {			
 		return data.map(function(line, i) {	
 						
 			var selector,
@@ -41,13 +41,11 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			}
 			
 			if (!spaces) {
-				spaces = "init";
+				indentLevel = 0;
 			} else {
-				spaces = spaces/unit;
+				indentLevel = spaces/unit;
 			}
-			
-			indentLevel = spaces;
-				
+							
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
 			
 			line.search(':') != "-1" ? property = true : property = false;
@@ -84,94 +82,94 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
 
-	var treeFormat = function (data) {
-		
-		// console.log(data);
-					
+	var treeFormat = function (lineObjects) {
+
+		// console.log(lineObjects);
+
 		var tree = [],
 			variables = [];
-			
-		data.forEach(function(elem, i) {
-		
+
+		lineObjects.forEach(function(elem, i) {
+
 			var parent = tree.length-1,
-				indent = data[i].indentLevel;
-			
+				indent = lineObjects[i].indentLevel;
+
 			if (elem.variable) {
 				variables.push(elem.variable.split('='));
 			}			
-			
+
 			if (elem.selector) {				
 				var declarations = [],
 					index = i + 1,
 					selector = elem.selector;
-									
+
 				var findDeclarations = function (index) {
-					if (typeof data[index] === 'undefined') {
+					if (typeof lineObjects[index] === 'undefined') {
 						return;
-					} else if (data[index].declaration.length) {
-						var value = data[index].declaration.toString();
+					} else if (lineObjects[index].declaration.length) {
+						var value = lineObjects[index].declaration.toString();
 						// replace variables
 						for (var i = 0; i < variables.length; i++) {
 							var one = variables[i][0].trim(),
 								two = variables[i][1].replace(';', '').trim();
 							value = value.replace(one, two);
 						}
-								
+
 						declarations.push(value);
 						index = index + 1;
 						findDeclarations(index);
 					} 
 				}; 
-					
+
 				findDeclarations(index);
-				
+
 				tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
-			// I need to remove the empty string children before the data gets to the CSS formatter...
+			// I need to remove the empty string children before the lineObjects gets to the CSS formatter...
 			// until then elem.children != "" is my fallback :/
-			
+
 			if (elem.child && elem.children != "") {
-								
+
 				var findChildren = function (parent, elem) {
-					
+
 					var declarations = [],
 						parents = [],
 						selector = elem.children.toString();
-					
+
 						findDeclarations = function (i) {
 							i++	
-							if (data[i].declaration.length === 0) {
+							if (lineObjects[i].declaration.length === 0) {
 								return;
 							} else {
-								var value = data[i].declaration.toString();
-								
+								var value = lineObjects[i].declaration.toString();
+
 								// replace variables
 								for (var j = 0; j < variables.length; j++) {
 									var one = variables[j][0].trim(),
 										two = variables[j][1].replace(';', '').trim();
 									value = value.replace(one, two);
 								}
-								
+
 								declarations.push(value);
 								findDeclarations(i);
 							}
 						};
-					
+
 					// parents.push(parent.selector);
 
 					findDeclarations(i);
 
 					tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
-					
+
 				};
 
 				findChildren(tree[parent], elem);
-				
+
 			}
-			
+
 		});
-	
+
 		return tree;
 	};
 	
@@ -198,13 +196,13 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				}
 			};
 
-			if (elem.indentLevel === "init") {
+			if (elem.indentLevel === 0) {
 				newTree.push(elem);
 				return;
 			}
 
 			if (elem.indentLevel === 1) {
-				find("init");
+				find(0);
 			} 
 			
 			if (elem.indentLevel === 3) {
@@ -234,7 +232,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 		function _generateCSS (tree, prefix) {
 			for (i=0; i<tree.length; i++) {
-		
 				sel = prefix + tree[i].selector,
 				dec = tree[i].declarations.join("; \n") + ";",
 				block = sel + beginBlock + dec + endBlock;
@@ -244,7 +241,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				if (tree[i].children.length) {
 					_generateCSS(tree[i].children, sel);
 				}
-					
 			}
 		}
 		
@@ -254,10 +250,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			
 	};
 		
-	var init = init(data.split('\n'));
+	var lineObjects = processLines(data.split('\n'));
 		
-	var output = (generateCSS(findParents(treeFormat(init)))).join('\n');
-		
+	var output = (generateCSS(findParents(treeFormat(lineObjects)))).join('\n');
+	
+	console.log(output);
+	
 	// var test = findParents(treeFormat(init));
 	
 	// stringify the final data array
