@@ -220,43 +220,44 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return newTree;
 	};
 	
-	// cssFormat takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
-	
-	var holder = [];
-	
-	var cssFormat = function cssFormat (tree, prefix) {
+	// generateCSS takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
 		
-		prefix = prefix || "";
+	var generateCSS = function generateCSS (tree) {			
+		var beginBlock = " {" + "\n",
+			endBlock = "\n" + "}",
+			output = [],
+			block,
+			sel,
+			dec,
+			parents,
+			i;
 		
+		function _generateCSS (tree, prefix) {
+			for (i=0; i<tree.length; i++) {
 		
-		return tree.map(function(elem, i){
-			var beginBlock = " {" + "\n",
-				endBlock = "\n" + "}",
-				sel = prefix + elem.selector,
-				dec = elem.declarations.join("; \n") + ";",
-				block,
-				children = "",
-				parents;
-			
-			block = sel + beginBlock + dec + endBlock;
+				sel = prefix + tree[i].selector,
+				dec = tree[i].declarations.join("; \n") + ";",
+				block = sel + beginBlock + dec + endBlock;
 
-			holder.push(JSON.stringify(block, undefined, 2));
-							
-			if (elem.children.length) {
-				children = cssFormat(elem.children, sel);
+				output.push(block);
+						
+				if (tree[i].children.length) {
+					_generateCSS(tree[i].children, sel);
+				}
+					
 			}
+		}
+		
+		_generateCSS(tree, "");
+		
+		return output;
 			
-			return block;
-			
-		});
 	};
 		
 	var init = init(data.split('\n'));
 		
-	var output = (cssFormat(findParents(treeFormat(init)))).join('\n');
-	
-	console.log(holder);
-	
+	var output = (generateCSS(findParents(treeFormat(init)))).join('\n');
+		
 	// var test = findParents(treeFormat(init));
 	
 	// stringify the final data array
