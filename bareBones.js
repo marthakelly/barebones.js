@@ -34,7 +34,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (firstChar !== null) {
 				var index = firstChar['index'];
 			}
-
+	
 			indentLevel = index;
 				
 			/^\s/.test(line) ? indentExists = true : indentExists = false;
@@ -73,10 +73,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	// treeFormat takes the array from init and turns it into an array of CSS objects (blocks) with nested children if applicable
 
-	var treeFormat = function (data) {
-		
-		console.log(data);
-			
+	var treeFormat = function (data) {			
 		var tree = [],
 			variables = [];
 			
@@ -114,7 +111,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					
 				findDeclarations(index);
 				
-				tree.push({ indent: indent, selector: selector, declarations: declarations });
+				tree.push({ indent: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
 			// I need to remove the empty string children before the data gets to the CSS formatter...
@@ -151,7 +148,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 
-					tree.push({ parents: [], indent: indent, selector: selector, declarations: declarations })
+					tree.push({ indent: indent, selector: selector, declarations: declarations, children: [] })
 					
 				};
 
@@ -164,38 +161,45 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		return tree;
 	};
 	
-	var findParents = function(tree) {
+	var findParents = function(tree) {	
+		
+		// console.log(tree);
+		
 		tree.forEach(function(elem, i){
-			var parent,
-				format,
-				selector;
-			if (!elem.indent) {
-				return;
-			} else {
-				var appendParents = function(elem){
-					i--
-					 if (elem.indent > tree[i].indent) {
-						format = tree[i].selector.trim();
-						selector = format + " ";
-						elem.parents.push(selector);
-						if (tree[i].parents){
-							parent = tree[i].parents.join("");
-							elem.parents.unshift(parent);
+						
+			var findChildren = function(elem) {
+			
+				var inc = i+1;
+				
+				if (!tree[inc]) {
+					return;
+				}
+				
+				if (!elem.indent) {
+					if (tree[inc]) {
+						if (tree[inc].indent > 0) {
+							elem.children.push(tree[inc]);
+						} else {
+							return;
 						}
-					} else if (elem.indent < tree[i].indent){
-						var findMe = function(i) {
-							i--
-							if (elem.indent === tree[i].indent) {
-								elem.parents.push(tree[i].selector);
-							} else {
-								findMe(i);
-							}
-						};
-						findMe(i);
+					} else {
+						return;
 					}
-				};
-			}
-			appendParents(elem);
+				} 
+				
+				if (tree[inc].indent > elem.indent) {
+					elem.children.push(tree[inc]);
+					i++
+					findChildren(elem, i);
+				} else if (tree[inc].indent = elem.indent) {
+					console.log(elem);
+				} else {
+					return;
+				}
+			};
+			
+			findChildren(elem);
+			
 		});
 		
 		return tree;
@@ -229,7 +233,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	// stringify the final data array
 	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
 
-	console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
+	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
 
 
 	fs.writeFile(css, output, function(err) {
