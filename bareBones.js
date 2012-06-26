@@ -44,18 +44,17 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			if (typeof whiteSpace === "undefined" && property === true) {
 				var firstChar = line.match('[a-zA-z]'),
 					index = firstChar['index'];
-								
 				whiteSpace = line.substr(0, index);
 			}
 			
 			if (line.charAt(0) === '@') {
 				variable = line;
 			} else if (indentExists === false && !(line.charAt(0) === "@")) {
-				selector = line;
+				selector = line.trim();
 			} else if (property === true) {
 				properties.push(whiteSpace + line.trimLeft());	
 			} else if (indentExists === true && property === false) {
-				children.push(line.trimLeft());
+				children.push(line.trim());
 				child = true;
 			}
 			
@@ -76,7 +75,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 	var treeFormat = function (data) {
 		
-		// console.log(data);
+		console.log(data);
 			
 		var tree = [],
 			variables = [];
@@ -126,7 +125,8 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				var findChildren = function (parent, elem) {
 					
 					var declarations = [],
-						parents = [];
+						parents = [],
+						selector = elem.children.toString();
 					
 						findDeclarations = function (i) {
 							i++	
@@ -151,7 +151,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 
-					tree.push({ parents: [], indent: indent, selector: elem.children.toString(), declarations: declarations })
+					tree.push({ parents: [], indent: indent, selector: selector, declarations: declarations })
 					
 				};
 
@@ -166,18 +166,20 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	var findParents = function(tree) {		
 		tree.forEach(function(elem, i){	
-			var parent;
-			
+			var parent,
+				format,
+				selector;
 			if (!elem.indent) {
 				return;
 			} else {
 				var stuff = function(elem){
 					i--
 					 if (elem.indent > tree[i].indent) {
-						elem.parents.push(tree[i].selector);
-
+						format = tree[i].selector.trim();
+						selector = format + " ";
+						elem.parents.push(selector);
 						if (tree[i].parents){
-							parent = tree[i].parents.join(" ");
+							parent = tree[i].parents.join("");
 							elem.parents.unshift(parent);
 						}
 					} else {
@@ -185,7 +187,6 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 					}
 				};
 			}
-			
 			stuff(elem);
 			
 		// if element's indentation is greater than the index before it
@@ -202,14 +203,14 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 	
 	var cssFormat = function (tree) {
 		
-		console.log(tree);
+		// console.log(tree);
 				
 		return tree.map(function(elem, i){		
 			var beginBlock = " {" + "\n",
 				endBlock = "\n" + "}",
 				sel = elem.selector,
 				dec = elem.declarations.join("; \n") + ";",
-				parents = elem.parents ? elem.parents.join(" ") : "",
+				parents = elem.parents ? elem.parents.join("") : "",
 				block,
 				children;
 							
