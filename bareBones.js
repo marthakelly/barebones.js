@@ -87,8 +87,21 @@ var bareBones = function(data) {
 	var formatBlocks = function (lineObjects) {
 		var blockArray = [],
 			variables = {};
-			
-		function _replaceVariables(line, array) {
+
+		function _findDeclarations (index, array) {
+			if (typeof lineObjects[index] === 'undefined') {
+				return;
+			} else if (lineObjects[index].declaration.length) {
+				line = lineObjects[index].declaration.toString();
+
+				_replaceVariables(line, array);
+
+				index++;
+				_findDeclarations(index, array);
+			} 
+		};
+				
+		function _replaceVariables (line, array) {
 			for (variable in variables) {
 				if (variables.hasOwnProperty(variable)) {
 					line = line.replace(variable, variables[variable]);
@@ -120,20 +133,7 @@ var bareBones = function(data) {
 				index = i + 1,
 				selector = elem.selector;
 
-				function _findDeclarations (index) {
-					if (typeof lineObjects[index] === 'undefined') {
-						return;
-					} else if (lineObjects[index].declaration.length) {
-						line = lineObjects[index].declaration.toString();
-						
-						_replaceVariables(line, declarations);
-						
-						index++;
-						_findDeclarations(index);
-					} 
-				}; 
-
-				_findDeclarations(index);
+				_findDeclarations(index, declarations);
 
 				blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
@@ -143,44 +143,20 @@ var bareBones = function(data) {
 
 			if (elem.child && elem.children != "") {
 
-				var findChildren = function (parent, elem) {
+				function _findChildren (parent, elem) {
 
 					var declarations = [],
 						parents = [],
-						selector = elem.children.toString();
-
-						findDeclarations = function (i) {
-							i++	
-							if (lineObjects[i].declaration.length === 0) {
-								return;
-							} else {
-								var value = lineObjects[i].declaration.toString();
-
-								/*// replace variables
-								for (var j = 0; j < variables.length; j++) {
-									var one = variables[j][0].trim(),
-										two = variables[j][1].replace(';', '').trim();
-									value = value.replace(one, two);
-								}
-
-								declarations.push(value);*/
-								
-								_replaceVariables(value, declarations);
-								
-								
-								findDeclarations(i);
-							}
-						};
-
-					// parents.push(parent.selector);
-
-					findDeclarations(i);
-
+						selector = elem.children.toString(),
+						index = i + 1;
+					
+					_findDeclarations(index, declarations);
+					
 					blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
 
 				};
 
-				findChildren(blockArray[parent], elem);
+				_findChildren(blockArray[parent], elem);
 
 			}
 
