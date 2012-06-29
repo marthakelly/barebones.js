@@ -87,7 +87,6 @@ var bareBones = function(data) {
 	// each array represents a CSS block
 
 	var formatBlocks = function (lineObjects) {
-		console.log(lineObjects);
 		var blockArray = [],
 			variables = {};
 
@@ -139,7 +138,10 @@ var bareBones = function(data) {
 				blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
-			if (elem.child) {
+			// I need to remove the empty string children before the lineObjects gets to the CSS formatter...
+			// until then elem.children != "" is my fallback :/
+			
+			if (elem.child && elem.children != "") {
 				function _findChildren (parent, elem) {
 					var declarations = [],
 						parents = [],
@@ -148,7 +150,7 @@ var bareBones = function(data) {
 					
 					_findDeclarations(index, declarations);
 					
-					blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
+					blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 
 				};
 
@@ -243,4 +245,3 @@ var bareBones = function(data) {
 	});
 
 };
-
