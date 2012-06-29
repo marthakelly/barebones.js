@@ -87,6 +87,15 @@ var bareBones = function(data) {
 	var formatBlocks = function (lineObjects) {
 		var blockArray = [],
 			variables = {};
+			
+		function _replaceVariables(line, array) {
+			for (variable in variables) {
+				if (variables.hasOwnProperty(variable)) {
+					line = line.replace(variable, variables[variable]);
+				}
+			}
+			array.push(line);
+		};
 
 		lineObjects.forEach(function(elem, i) {
 			var parent = blockArray.length-1,
@@ -117,19 +126,7 @@ var bareBones = function(data) {
 					} else if (lineObjects[index].declaration.length) {
 						line = lineObjects[index].declaration.toString();
 						
-						for (variable in variables) {
-							if (variables.hasOwnProperty(variable)) {
-								line = line.replace(variable, variables[variable]);
-								
-								// needs work!
-								
-								console.log("replacing:", variable, 'with:', variables[variable]);
-							}
-						}
-						
-						declarations.push(line);
-						
-						console.log(line);
+						_replaceVariables(line, declarations);
 						
 						index++;
 						_findDeclarations(index);
@@ -159,14 +156,18 @@ var bareBones = function(data) {
 							} else {
 								var value = lineObjects[i].declaration.toString();
 
-								// replace variables
+								/*// replace variables
 								for (var j = 0; j < variables.length; j++) {
 									var one = variables[j][0].trim(),
 										two = variables[j][1].replace(';', '').trim();
 									value = value.replace(one, two);
 								}
 
-								declarations.push(value);
+								declarations.push(value);*/
+								
+								_replaceVariables(value, declarations);
+								
+								
 								findDeclarations(i);
 							}
 						};
