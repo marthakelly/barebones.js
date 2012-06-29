@@ -128,6 +128,9 @@ var bareBones = function(data) {
 						}
 						
 						declarations.push(line);
+						
+						console.log(line);
+						
 						index++;
 						_findDeclarations(index);
 					} 
