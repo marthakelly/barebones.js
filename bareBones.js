@@ -168,20 +168,19 @@ var bareBones = function(data) {
 
 		blockArray.map(function(elem, i){
 			var inc = i+1,
-				dec = i-1;
-			
-			var find = function(level) {
-				i--
+				dec = i-1,
+				find = function(level) {
+					i--
 				
-				if (!blockArray[i]) {
-					return;
-				} else if (blockArray[i].indentLevel === level) {
-					blockArray[i].children.push(elem);
-					return;
-				} else {
-					find(level);
-				}
-			};
+					if (!blockArray[i]) {
+						return;
+					} else if (blockArray[i].indentLevel === level) {
+						blockArray[i].children.push(elem);
+						return;
+					} else {
+						find(level);
+					}
+				};
 
 			if (elem.indentLevel === 0) {
 				newblockArray.push(elem);
@@ -216,17 +215,20 @@ var bareBones = function(data) {
 			dec,
 			parents,
 			i;
-		
+					
 		function _generateCSS (blockArray, prefix) {
+			var parent;
+			
 			for (i=0; i<blockArray.length; i++) {
 				sel = prefix + blockArray[i].selector + " ",
 				dec = blockArray[i].declarations.join("; \n") + ";",
-				block = sel + beginBlock + dec + endBlock;
-
+				block = sel + beginBlock + dec + endBlock,
+				
 				output.push(block);
 						
-				if (blockArray[i].children.length) {	
-					console.log(blockArray[i]);
+				if (blockArray[i].children.length) {
+					parent = i;
+					// console.log(blockArray[parent]);
 					_generateCSS(blockArray[i].children, sel);
 				}
 			}
@@ -237,6 +239,34 @@ var bareBones = function(data) {
 		return output;
 			
 	};
+	
+	var blockToCSS = function blockToCSS(block) {
+		var beginBlock = " {" + "\n",
+			endBlock = "\n" + "}",
+			output = [],
+			sel,
+			dec,
+			block,
+			parentCSS;
+				
+		sel = block.selector + " ";
+		dec = block.declarations.join("; \n") + ";";
+		parentCSS = sel + beginBlock + dec + endBlock;
+		
+		if (!block.children.length) {
+			return [parentCSS];
+		} else {
+			var childrenCSS = block.children.map(blockToCSS).reduce(function(acc, children) {
+				return acc.concat(children);
+			});
+			var prefixedChildrenCSS = childrenCSS.map(function(child) {
+				return sel + child;
+			});
+			prefixedChildrenCSS.unshift([parentCSS]);
+			
+			return prefixedChildrenCSS;
+		}
+	}
 		
 	var lineObjects = processLines(data.split('\n'));
 		
@@ -248,5 +278,74 @@ var bareBones = function(data) {
 	});
 	
 	var lineObjects = processLines(data.split('\n'));
-	// console.log(JSON.stringify(findParents(formatBlocks(lineObjects)), undefined, 2));
+	
+	//console.log(JSON.stringify(findParents(formatBlocks(lineObjects))));
+	
+	//console.log(blockToCSS(formatBlocks(lineObjects)[2]));
+	
+	var result = blockToCSS({
+	    "indentLevel": 0,
+	    "selector": "#divId",
+	    "declarations": [
+	      "    color: green"
+	    ],
+	    "children": [
+	      {
+	        "indentLevel": 1,
+	        "selector": ".sidebar",
+	        "declarations": [
+	          "    font-family: serif",
+	          "    width: 500px",
+	          "    border: 1px solid #000"
+	        ],
+	        "children": [
+	          {
+	            "indentLevel": 3,
+	            "selector": ".divClass",
+	            "declarations": [
+	              "    color: pink"
+	            ],
+	            "children": []
+	          },
+	          {
+	            "indentLevel": 3,
+	            "selector": ".fooBAR",
+	            "declarations": [
+	              "    width: 99px",
+	              "    color: yellow"
+	            ],
+	            "children": [
+	              {
+	                "indentLevel": 4,
+	                "selector": ".anotherThing",
+	                "declarations": [
+	                  "    border: 1px solid #000",
+	                  "    width: 1000px"
+	                ],
+	                "children": []
+	              }
+	            ]
+	          }
+	        ]
+	      },
+	      {
+	        "indentLevel": 1,
+	        "selector": ".foo",
+	        "declarations": [
+	          "    width: 99px",
+	          "    color: yellow"
+	        ],
+	        "children": []
+	      },
+	      {
+	        "indentLevel": 1,
+	        "selector": ".anotherFoo1",
+	        "declarations": [
+	          "    border: 1px solid #FFF"
+	        ],
+	        "children": []
+	      }
+	    ]
+	  });
+	console.log(result.join("\n"));
 };
