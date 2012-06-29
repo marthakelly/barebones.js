@@ -7,19 +7,23 @@ var fs = require('fs'),
 	isEmpty = function(obj) {
 	  return Object.keys(obj).length === 0;
 	};
+
+// node's file system will take in our custom .bare file and make it available to bareBones();
 	
 fs.readFile(bare, 'utf-8', function(err, data) {
 	if (err) throw err;
-	
+	bareBones(data);
+});
+
+var bareBones = function(data) {
 	var whiteSpace,
-		unit;
-	
+		unit;	
+		
 	// init turns the data from the .bare file into an array of objects
 	// each object describes what part of a CSS block the line is
 	
-	var processLines = function (data) {			
+	var processLines = function (data) {
 		return data.map(function(line, i) {	
-						
 			var selector,
 				declaration,
 				indentExists,
@@ -28,12 +32,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				indentLevel = 0,
 				properties = [],
 				children = [],
-				child = false;
-			
-			var firstChar = line.match('[a-zA-Z\.\#\@]+');
+				child = false,
+				firstChar = line.match('[a-zA-Z\.\#\@]+'),
+				numSpaces;
 						
 			if (firstChar !== null) {
-				var numSpaces = firstChar['index'];
+				numSpaces = firstChar['index'];
 				if (typeof unit === "undefined" && numSpaces) {
 					unit = numSpaces;
 				}
@@ -76,24 +80,23 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	};
 	
-	// treeFormat takes the lineObjects array (of objects) and produces an array of objects used to generate CSS blocks
+	// formatBlocks takes the lineObjects array (of objects) and produces
+	// a formmatted array of objects used to generate CSS blocks
+	// each array represents a CSS block
 
-	var treeFormat = function (lineObjects) {
-
-		// console.log(lineObjects);
-
-		var tree = [],
+	var formatBlocks = function (lineObjects) {
+		var blockArray = [],
 			variables = {};
 
 		lineObjects.forEach(function(elem, i) {
-
-			var parent = tree.length-1,
+			var parent = blockArray.length-1,
 				indent = lineObjects[i].indentLevel,
 				varName,
 				varVal,
 				variableSplit,
-				line;
-
+				line,
+				declarations;
+				
 			if (elem.variable) {
 				variableSplit = elem.variable.split('=');
 				
@@ -101,39 +104,38 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 				varVal = variableSplit[1].replace(';', '').trim();
 				
 				variables[varName] = varVal;
-				
-			}			
+			}
 			
-			console.log(variables);
+			if (elem.selector) {
+				declarations = [],
+				index = i + 1,
+				selector = elem.selector;
 
-			if (elem.selector) {				
-				var declarations = [],
-					index = i + 1,
-					selector = elem.selector;
-
-				var findDeclarations = function (index) {
+				function _findDeclarations (index) {
 					if (typeof lineObjects[index] === 'undefined') {
 						return;
 					} else if (lineObjects[index].declaration.length) {
-						
 						line = lineObjects[index].declaration.toString();
 						
 						for (variable in variables) {
 							if (variables.hasOwnProperty(variable)) {
 								line = line.replace(variable, variables[variable]);
+								
+								// needs work!
+								
 								console.log("replacing:", variable, 'with:', variables[variable]);
 							}
 						}
-
+						
 						declarations.push(line);
 						index++;
-						findDeclarations(index);
+						_findDeclarations(index);
 					} 
 				}; 
 
-				findDeclarations(index);
+				_findDeclarations(index);
 
-				tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
+				blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
 			// I need to remove the empty string children before the lineObjects gets to the CSS formatter...
@@ -170,36 +172,34 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 					findDeclarations(i);
 
-					tree.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
+					blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] })
 
 				};
 
-				findChildren(tree[parent], elem);
+				findChildren(blockArray[parent], elem);
 
 			}
 
 		});
 
-		return tree;
+		return blockArray;
 	};
 	
-	var findParents = function(tree) {	
+	var findParents = function(blockArray) {	
 
-		// console.log(tree);
-		
-		var newTree = [];
+		var newblockArray = [];
 
-		tree.map(function(elem, i){
+		blockArray.map(function(elem, i){
 			var inc = i+1,
 				dec = i-1;
 			
 			var find = function(level) {
 				i--
 				
-				if (!tree[i]) {
+				if (!blockArray[i]) {
 					return;
-				} else if (tree[i].indentLevel === level) {
-					tree[i].children.push(elem);
+				} else if (blockArray[i].indentLevel === level) {
+					blockArray[i].children.push(elem);
 					return;
 				} else {
 					find(level);
@@ -207,7 +207,7 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			};
 
 			if (elem.indentLevel === 0) {
-				newTree.push(elem);
+				newblockArray.push(elem);
 				return;
 			}
 
@@ -225,12 +225,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 
 		});
 		
-		return newTree;
+		return newblockArray;
 	};
 	
-	// generateCSS takes the array of objects from treeFormat and writes a string for each CSS block to the new .css file
+	// generateCSS takes the array of objects from formatBlocks and writes a string for each CSS block to the new .css file
 		
-	var generateCSS = function generateCSS (tree) {			
+	var generateCSS = function generateCSS (blockArray) {			
 		var beginBlock = " {" + "\n",
 			endBlock = "\n" + "}",
 			output = [],
@@ -240,21 +240,21 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 			parents,
 			i;
 		
-		function _generateCSS (tree, prefix) {
-			for (i=0; i<tree.length; i++) {
-				sel = prefix + tree[i].selector,
-				dec = tree[i].declarations.join("; \n") + ";",
+		function _generateCSS (blockArray, prefix) {
+			for (i=0; i<blockArray.length; i++) {
+				sel = prefix + blockArray[i].selector,
+				dec = blockArray[i].declarations.join("; \n") + ";",
 				block = sel + beginBlock + dec + endBlock;
 
 				output.push(block);
 						
-				if (tree[i].children.length) {
-					_generateCSS(tree[i].children, sel);
+				if (blockArray[i].children.length) {
+					_generateCSS(blockArray[i].children, sel);
 				}
 			}
-		}
+		};
 		
-		_generateCSS(tree, "");
+		_generateCSS(blockArray, "");
 		
 		return output;
 			
@@ -262,19 +262,12 @@ fs.readFile(bare, 'utf-8', function(err, data) {
 		
 	var lineObjects = processLines(data.split('\n'));
 		
-	var output = (generateCSS(findParents(treeFormat(lineObjects)))).join('\n');
-	
-	console.log(output);
-	
-	// var test = findParents(treeFormat(init));
-	
-	// stringify the final data array
-	// console.log(JSON.stringify(treeFormat(init), undefined, 2));
+	var CSS = (generateCSS(findParents(formatBlocks(lineObjects)))).join('\n');
 
-	// console.log(JSON.stringify(findParents(treeFormat(init)), undefined, 2));
-
-	fs.writeFile(css, output, function(err) {
+	fs.writeFile(css, CSS, function(err) {
 		if (err) throw err;
 		console.log('Converted ' + bare + ' to ' + css);
-    });
-});
+	});
+
+};
+
