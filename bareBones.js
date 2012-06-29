@@ -219,7 +219,7 @@ var bareBones = function(data) {
 		
 		function _generateCSS (blockArray, prefix) {
 			for (i=0; i<blockArray.length; i++) {
-				sel = prefix + " " + blockArray[i].selector,
+				sel = prefix + blockArray[i].selector + " ",
 				dec = blockArray[i].declarations.join("; \n") + ";",
 				block = sel + beginBlock + dec + endBlock;
 
