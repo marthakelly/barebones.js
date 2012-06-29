@@ -23,7 +23,7 @@ var bareBones = function(data) {
 	// each object describes what part of a CSS block the line is
 	
 	var processLines = function (data) {
-		return data.map(function(line, i) {	
+		return data.map(function(line, i) {
 			var selector,
 				declaration,
 				indentExists,
@@ -35,7 +35,7 @@ var bareBones = function(data) {
 				child = false,
 				firstChar = line.match('[a-zA-Z\.\#\@]+'),
 				numSpaces;
-						
+			
 			if (firstChar !== null) {
 				numSpaces = firstChar['index'];
 				if (typeof unit === "undefined" && numSpaces) {
@@ -56,14 +56,16 @@ var bareBones = function(data) {
 				whiteSpace = line.substr(0, firstChar['index']);
 			}
 			
+			line = line.trim();
+			
 			if (line.charAt(0) === '@') {
 				variable = line;
 			} else if (indentExists === false && !(line.charAt(0) === "@")) {
-				selector = line.trim();
+				selector = line;
 			} else if (property === true) {
 				properties.push(whiteSpace + line.trimLeft());	
 			} else if (indentExists === true && property === false) {
-				children.push(line.trim());
+				children.push(line);
 				child = true;
 			}
 			
@@ -85,6 +87,7 @@ var bareBones = function(data) {
 	// each array represents a CSS block
 
 	var formatBlocks = function (lineObjects) {
+		console.log(lineObjects);
 		var blockArray = [],
 			variables = {};
 
@@ -121,10 +124,8 @@ var bareBones = function(data) {
 				
 			if (elem.variable) {
 				variableSplit = elem.variable.split('=');
-				
 				varName = variableSplit[0].trim();
 				varVal = variableSplit[1].replace(';', '').trim();
-				
 				variables[varName] = varVal;
 			}
 			
@@ -138,13 +139,8 @@ var bareBones = function(data) {
 				blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
 			}
 
-			// I need to remove the empty string children before the lineObjects gets to the CSS formatter...
-			// until then elem.children != "" is my fallback :/
-
-			if (elem.child && elem.children != "") {
-
+			if (elem.child) {
 				function _findChildren (parent, elem) {
-
 					var declarations = [],
 						parents = [],
 						selector = elem.children.toString(),
@@ -159,14 +155,11 @@ var bareBones = function(data) {
 				_findChildren(blockArray[parent], elem);
 
 			}
-
 		});
-
 		return blockArray;
 	};
 	
 	var findParents = function(blockArray) {	
-
 		var newblockArray = [];
 
 		blockArray.map(function(elem, i){
