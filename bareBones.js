@@ -161,7 +161,9 @@ var bareBones = function(data) {
 		return blockArray;
 	};
 	
-	var findParents = function(blockArray) {	
+	
+	var findParents = function(blockArray) {
+		// console.log(blockArray);
 		var newblockArray = [];
 
 		blockArray.map(function(elem, i){
@@ -205,7 +207,7 @@ var bareBones = function(data) {
 	
 	// generateCSS takes the array of objects from formatBlocks and writes a string for each CSS block to the new .css file
 		
-	var generateCSS = function generateCSS (blockArray) {			
+	var generateCSS = function generateCSS (blockArray) {
 		var beginBlock = " {" + "\n",
 			endBlock = "\n" + "}",
 			output = [],
@@ -217,13 +219,14 @@ var bareBones = function(data) {
 		
 		function _generateCSS (blockArray, prefix) {
 			for (i=0; i<blockArray.length; i++) {
-				sel = prefix + blockArray[i].selector,
+				sel = prefix + " " + blockArray[i].selector,
 				dec = blockArray[i].declarations.join("; \n") + ";",
 				block = sel + beginBlock + dec + endBlock;
 
 				output.push(block);
 						
-				if (blockArray[i].children.length) {
+				if (blockArray[i].children.length) {	
+					console.log(blockArray[i]);
 					_generateCSS(blockArray[i].children, sel);
 				}
 			}
@@ -243,5 +246,7 @@ var bareBones = function(data) {
 		if (err) throw err;
 		console.log('Converted ' + bare + ' to ' + css);
 	});
-
+	
+	var lineObjects = processLines(data.split('\n'));
+	// console.log(JSON.stringify(findParents(formatBlocks(lineObjects)), undefined, 2));
 };
