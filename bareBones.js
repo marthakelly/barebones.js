@@ -240,6 +240,8 @@ var bareBones = function(data) {
 			
 	};
 	
+	// blockToCSS :: Block -> [Css]
+	// [listofsass].map(blockToCss) --> [[Css]]
 	var blockToCSS = function blockToCSS(block) {
 		var beginBlock = " {" + "\n",
 			endBlock = "\n" + "}",
@@ -248,14 +250,32 @@ var bareBones = function(data) {
 			dec,
 			block,
 			parentCSS;
-				
+		
 		sel = block.selector + " ";
 		dec = block.declarations.join("; \n") + ";";
 		parentCSS = sel + beginBlock + dec + endBlock;
 		
+		// if block has no values in the children array
+			// return the most simple use case - one single block 
+			// this value is returned to the function which in turn is written to an external file
+		// else if block has values in the children array
+			// var childrenCSS is equal to mapping blockToCSS to this block's child array
+				// this will in turn be recursively applied to its own children
+				// the output of the children is reduced (concatenated) and returned
+			// var prefixedChildrenCSS is equal to the result of that return value mapped with the value of
+				//// the current value of "sel" (which is the parent selector) concatenated before it
+			// we then add the original block as the first entry in the prefixedChildrenCSS array
+				//// we return this value which is written to an external file
+		
+		// note to self::
+			// write your own flatten function
+		
 		if (!block.children.length) {
 			return [parentCSS];
 		} else {
+			//block.children.map(blockToCSS) returns a list of lists of CSS
+			//we really want a list of CSS
+			// so basically, smush together all the arrays
 			var childrenCSS = block.children.map(blockToCSS).reduce(function(acc, children) {
 				return acc.concat(children);
 			});
@@ -266,11 +286,18 @@ var bareBones = function(data) {
 			
 			return prefixedChildrenCSS;
 		}
-	}
+	};
 		
+	var flattenBlockToCSS = function(blockToCSS) {
+		var validCSS = blockToCSS.reduce(function(acc, children) {
+			return acc.concat(children);
+		});
+		return validCSS.join("\n");
+	};
+	
 	var lineObjects = processLines(data.split('\n'));
-		
-	var CSS = (generateCSS(findParents(formatBlocks(lineObjects)))).join('\n');
+	
+	var CSS = flattenBlockToCSS(findParents(formatBlocks(lineObjects)).map(blockToCSS));
 
 	fs.writeFile(css, CSS, function(err) {
 		if (err) throw err;
@@ -279,73 +306,5 @@ var bareBones = function(data) {
 	
 	var lineObjects = processLines(data.split('\n'));
 	
-	//console.log(JSON.stringify(findParents(formatBlocks(lineObjects))));
-	
-	//console.log(blockToCSS(formatBlocks(lineObjects)[2]));
-	
-	var result = blockToCSS({
-	    "indentLevel": 0,
-	    "selector": "#divId",
-	    "declarations": [
-	      "    color: green"
-	    ],
-	    "children": [
-	      {
-	        "indentLevel": 1,
-	        "selector": ".sidebar",
-	        "declarations": [
-	          "    font-family: serif",
-	          "    width: 500px",
-	          "    border: 1px solid #000"
-	        ],
-	        "children": [
-	          {
-	            "indentLevel": 3,
-	            "selector": ".divClass",
-	            "declarations": [
-	              "    color: pink"
-	            ],
-	            "children": []
-	          },
-	          {
-	            "indentLevel": 3,
-	            "selector": ".fooBAR",
-	            "declarations": [
-	              "    width: 99px",
-	              "    color: yellow"
-	            ],
-	            "children": [
-	              {
-	                "indentLevel": 4,
-	                "selector": ".anotherThing",
-	                "declarations": [
-	                  "    border: 1px solid #000",
-	                  "    width: 1000px"
-	                ],
-	                "children": []
-	              }
-	            ]
-	          }
-	        ]
-	      },
-	      {
-	        "indentLevel": 1,
-	        "selector": ".foo",
-	        "declarations": [
-	          "    width: 99px",
-	          "    color: yellow"
-	        ],
-	        "children": []
-	      },
-	      {
-	        "indentLevel": 1,
-	        "selector": ".anotherFoo1",
-	        "declarations": [
-	          "    border: 1px solid #FFF"
-	        ],
-	        "children": []
-	      }
-	    ]
-	  });
-	console.log(result.join("\n"));
+	// 	console.log(flattenBlockToCSS(findParents(formatBlocks(lineObjects)).map(blockToCSS)));
 };
