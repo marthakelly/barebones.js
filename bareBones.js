@@ -88,7 +88,8 @@ var bareBones = function(data) {
 
 	var formatBlocks = function (lineObjects) {
 		var blockArray = [],
-			variables = {};
+			variables = {},
+			mixins = {};
 
 		function _findDeclarations (index, array) {
 			if (typeof lineObjects[index] === 'undefined') {
@@ -128,6 +129,10 @@ var bareBones = function(data) {
 				variables[varName] = varVal;
 			}
 			
+			if (elem.mixin) {
+				
+			}
+			
 			if (elem.selector) {
 				declarations = [],
 				index = i + 1,
@@ -151,19 +156,14 @@ var bareBones = function(data) {
 					_findDeclarations(index, declarations);
 					
 					blockArray.push({ indentLevel: indent, selector: selector, declarations: declarations, children: [] });
-
 				};
-
 				_findChildren(blockArray[parent], elem);
-
 			}
 		});
 		return blockArray;
 	};
 	
-	
 	var findParents = function(blockArray) {
-		// console.log(blockArray);
 		var newblockArray = [];
 
 		blockArray.map(function(elem, i){
@@ -181,30 +181,26 @@ var bareBones = function(data) {
 						find(level);
 					}
 				};
-
 			if (elem.indentLevel === 0) {
 				newblockArray.push(elem);
 				return;
 			}
-
 			if (elem.indentLevel === 1) {
 				find(0);
 			} 
-			
 			if (elem.indentLevel === 3) {
 				find(1);
-			}
-			
+			}	
 			if (elem.indentLevel === 4) {
 				find(3);
 			}
-
 		});
 		
 		return newblockArray;
 	};
 	
-	// generateCSS takes the array of objects from formatBlocks and writes a string for each CSS block to the new .css file
+	// generateCSS takes the array of objects from formatBlocks 
+	// and writes a string for each CSS block to the new .css file
 		
 	var generateCSS = function generateCSS (blockArray) {
 		var beginBlock = " {" + "\n",
@@ -236,12 +232,9 @@ var bareBones = function(data) {
 		
 		_generateCSS(blockArray, "");
 		
-		return output;
-			
+		return output;	
 	};
-	
-	// blockToCSS :: Block -> [Css]
-	// [listofsass].map(blockToCss) --> [[Css]]
+
 	var blockToCSS = function blockToCSS(block) {
 		var beginBlock = " {" + "\n",
 			endBlock = "\n" + "}",
@@ -255,27 +248,9 @@ var bareBones = function(data) {
 		dec = block.declarations.join("; \n") + ";";
 		parentCSS = sel + beginBlock + dec + endBlock;
 		
-		// if block has no values in the children array
-			// return the most simple use case - one single block 
-			// this value is returned to the function which in turn is written to an external file
-		// else if block has values in the children array
-			// var childrenCSS is equal to mapping blockToCSS to this block's child array
-				// this will in turn be recursively applied to its own children
-				// the output of the children is reduced (concatenated) and returned
-			// var prefixedChildrenCSS is equal to the result of that return value mapped with the value of
-				//// the current value of "sel" (which is the parent selector) concatenated before it
-			// we then add the original block as the first entry in the prefixedChildrenCSS array
-				//// we return this value which is written to an external file
-		
-		// note to self::
-			// write your own flatten function
-		
 		if (!block.children.length) {
 			return [parentCSS];
 		} else {
-			//block.children.map(blockToCSS) returns a list of lists of CSS
-			//we really want a list of CSS
-			// so basically, smush together all the arrays
 			var childrenCSS = block.children.map(blockToCSS).reduce(function(acc, children) {
 				return acc.concat(children);
 			});
@@ -303,8 +278,4 @@ var bareBones = function(data) {
 		if (err) throw err;
 		console.log('Converted ' + bare + ' to ' + css);
 	});
-	
-	var lineObjects = processLines(data.split('\n'));
-	
-	// 	console.log(flattenBlockToCSS(findParents(formatBlocks(lineObjects)).map(blockToCSS)));
 };
