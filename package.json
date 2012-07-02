@@ -1,0 +1,12 @@
+{
+    "name" : "bareBones.js",
+    "description" : "Lightweight easy to use CSS preprocessor",
+    "keywords" : ["css", "preprocessor", "lightweight", "easy"],
+    "author" : "Martha Kelly <<a href="mailto:mk.girdler@gmail.com"mk.girdler@gmail.com</a>",
+    "contributors" : [],
+    "dependencies" : [],
+    "repository" : {"type": "git", "url": "git://github.com/marthakelly/bareBones.js.git"},
+    "main" : "bareBones.js",
+    "version" : "1.0",
+    "bin" : "bareBones" : "./bareBones.js"
+}
