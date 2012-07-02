@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 var fs = require('fs'),
 	bare = process.argv.splice(2)[0],
 	css = bare.substring(0, bare.lastIndexOf('.')) + '.css',
