@@ -251,9 +251,12 @@ var bareBones = function(data) {
 		if (!block.children.length) {
 			return [parentCSS];
 		} else {
+			// console.log(block);
 			var childrenCSS = block.children.map(blockToCSS).reduce(function(acc, children) {
+				console.log(acc.concat(children));
 				return acc.concat(children);
 			});
+			//console.log(childrenCSS);
 			var prefixedChildrenCSS = childrenCSS.map(function(child) {
 				return sel + child;
 			});
