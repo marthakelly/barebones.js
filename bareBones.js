@@ -195,45 +195,9 @@ var bareBones = function(data) {
 				find(3);
 			}
 		});
-		
 		return newblockArray;
 	};
 	
-	// generateCSS takes the array of objects from formatBlocks 
-	// and writes a string for each CSS block to the new .css file
-		
-	var generateCSS = function generateCSS (blockArray) {
-		var beginBlock = " {" + "\n",
-			endBlock = "\n" + "}",
-			output = [],
-			block,
-			sel,
-			dec,
-			parents,
-			i;
-					
-		function _generateCSS (blockArray, prefix) {
-			var parent;
-			
-			for (i=0; i<blockArray.length; i++) {
-				sel = prefix + blockArray[i].selector + " ",
-				dec = blockArray[i].declarations.join("; \n") + ";",
-				block = sel + beginBlock + dec + endBlock,
-				
-				output.push(block);
-						
-				if (blockArray[i].children.length) {
-					parent = i;
-					// console.log(blockArray[parent]);
-					_generateCSS(blockArray[i].children, sel);
-				}
-			}
-		};
-		
-		_generateCSS(blockArray, "");
-		
-		return output;	
-	};
 
 	var blockToCSS = function blockToCSS(block) {
 		var beginBlock = " {" + "\n",
@@ -251,12 +215,9 @@ var bareBones = function(data) {
 		if (!block.children.length) {
 			return [parentCSS];
 		} else {
-			// console.log(block);
 			var childrenCSS = block.children.map(blockToCSS).reduce(function(acc, children) {
-				console.log(acc.concat(children));
 				return acc.concat(children);
 			});
-			//console.log(childrenCSS);
 			var prefixedChildrenCSS = childrenCSS.map(function(child) {
 				return sel + child;
 			});
@@ -267,6 +228,7 @@ var bareBones = function(data) {
 	};
 		
 	var flattenBlockToCSS = function(blockToCSS) {
+		console.log(blockToCSS);
 		var validCSS = blockToCSS.reduce(function(acc, children) {
 			return acc.concat(children);
 		});
