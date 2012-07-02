@@ -11,7 +11,7 @@ bareBones.js
 
     a
         color: @light-gray
-        text-decoration: none
+        padding: @standard-padding
  
 ### Children are nested through indentation
     
