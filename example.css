@@ -1,0 +1,47 @@
+body  {
+    font: 12px Helvetica, Arial, sans-serif; 
+    color: green; 
+    background: yellow;
+}
+a.button  {
+    color: blue; 
+    width: 200px;
+}
+#divId  {
+    color: green;
+}
+#divId .sidebar  {
+    font-family: serif; 
+    width: 500px; 
+    border: 1px solid #000;
+}
+#divId .sidebar .divClass  {
+    color: pink;
+}
+#divId .sidebar .fooBAR  {
+    width: 99px; 
+    color: yellow;
+}
+#divId .sidebar .fooBAR .anotherThing  {
+    border: 1px solid #000; 
+    width: 1000px;
+}
+#divId .foo  {
+    width: 99px; 
+    color: yellow;
+}
+#divId .anotherFoo1  {
+    border: 1px solid #FFF;
+}
+.class  {
+    color: blue;
+}
+.class .classNESTED  {
+    color: blue;
+}
+.class  {
+    color: yourMom;
+}
+.class .thisIsAChild  {
+    border: 1px solid #CCC;
+}

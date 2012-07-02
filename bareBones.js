@@ -198,7 +198,6 @@ var bareBones = function(data) {
 		return newblockArray;
 	};
 	
-
 	var blockToCSS = function blockToCSS(block) {
 		var beginBlock = " {" + "\n",
 			endBlock = "\n" + "}",
@@ -228,7 +227,6 @@ var bareBones = function(data) {
 	};
 		
 	var flattenBlockToCSS = function(blockToCSS) {
-		console.log(blockToCSS);
 		var validCSS = blockToCSS.reduce(function(acc, children) {
 			return acc.concat(children);
 		});

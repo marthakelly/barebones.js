@@ -16,7 +16,9 @@
 		//  '    background: yellow' ],
 		// children: []
 	// find parents should take in an array of objects and return an object with objects in the children
-	// 
+	// blockToCSS should take in a single Object and return a CSS block as an entry in an array
+	// flattenBlockToCSS takes in the array from blockToCSS and flattens it into a single array and 
+		// then joins each item in the array with a line break
 	
 
 // arrange
@@ -30,3 +32,14 @@
 // assert
 
 	// assert that the result is what you expected
+	
+exports.testSomething = function(test){
+    test.expect(1);
+    test.ok(true, "this assertion should pass");
+    test.done();
+};
+
+exports.testSomethingElse = function(test){
+    test.ok(false, "this assertion should fail");
+    test.done();
+};

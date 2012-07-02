@@ -1,0 +1,51 @@
+@color1 = blue;
+@color2 = pink;
+@color3 = red;
+@color4 = yellow;
+
+body
+    font: 12px Helvetica, Arial, sans-serif
+    color: green
+    background: @color4
+        
+a.button
+    color: @color1
+    width: 200px
+    
+#divId
+    color: green
+    
+    .sidebar
+        font-family: serif
+        width: 500px
+        border: 1px solid #000
+        
+            .divClass
+                color: @color2
+            
+            .fooBAR
+                width: 99px
+                color: @color4
+                
+                .anotherThing
+                    border: 1px solid #000
+                    width: 1000px
+
+    .foo
+        width: 99px
+        color: @color4
+        
+    .anotherFoo1
+        border: 1px solid #FFF
+        
+.class
+    color: blue
+    
+    .classNESTED
+        color: blue
+
+.class
+    color: yourMom
+    
+    .thisIsAChild
+        border: 1px solid #CCC
